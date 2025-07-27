@@ -82,17 +82,45 @@ import { Router } from '@angular/router';
                     </button>
 
                     <p-overlayPanel #overlay>
-                        <div class="p-3">
-                            <p class="mb-2 font-medium">Mi cuenta</p>
+                        <div class="p-5">
+                            <p class="mb-3 font-medium">Mi cuenta</p>
                             <ul class="list-none m-0 p-0">
                             <li>
-                                <button pButton class="w-full text-left p-button-text" (click)="goToProfile()">
+                                <button pButton class="w-full text-left p-button-text text-lg my-2" (click)="goToProfile()">
                                 <i class="pi pi-user-edit mr-2"></i> Perfil
                                 </button>
                             </li>
                             <li>
-                                <button pButton class="w-full text-left p-button-text text-red-600" (click)="logout()">
-                                <i class="pi pi-sign-out mr-2"></i> Cerrar sesión
+                                <button pButton class="w-full text-left p-button-text text-lg my-2" (click)="goToProfile()">
+                                <i class="pi pi-key mr-2"></i> change-password
+                                </button>
+                            </li>
+                            <li>
+                                <button pButton class="w-full text-left p-button-text text-lg my-2" (click)="goToProfile()">
+                                <i class="pi pi-clock mr-2"></i> activity-log
+                                </button>
+                            </li>
+
+                            <li>
+                                <button pButton class="w-full text-left p-button-text text-lg my-2" (click)="goToProfile()">
+                                <i class="pi pi-wallet mr-2"></i> billing
+                                </button>
+                            </li>
+
+                            <li>
+                                <button pButton class="w-full text-left p-button-text text-lg my-2" (click)="goToProfile()">
+                                <i class="pi pi-briefcase mr-2"></i> subscription
+                                </button>
+                            </li>
+
+                            <li>
+                                <button pButton class="w-full text-left p-button-text text-lg my-2" (click)="goToProfile()">
+                                <i class="pi pi-cog mr-2"></i>settings
+                                </button>
+                            </li>
+                            <li>
+                                <button pButton class="w-full text-left p-button-text text-red-600 text-lg" (click)="logout()">
+                                <i class="pi pi-sign-out mr-2"></i> Logout
                 </button>
               </li>
             </ul>

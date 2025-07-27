@@ -9,7 +9,7 @@ import { AuthGuard } from './app/core/guard/auth.guard';
 export const appRoutes: Routes = [
   // 🔓 Ruta pública
   { path: 'auth/login', loadComponent: () => import('./app/pages/auth/login').then(m => m.Login) },
-//   { path: 'forgot-password', loadComponent: () => import('./app/pages/auth/forgot-password').then(m => m.ForgotPassword) },
+  { path: 'forgot-password', loadComponent: () => import('./app/pages/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent) },
 
 
   // 🔐 Rutas protegidas dentro del layout
