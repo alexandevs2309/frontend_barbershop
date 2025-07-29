@@ -8,11 +8,14 @@ import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
 import { AuthService } from './service/auth.service';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-login',
     standalone: true,
     imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator],
+    providers: [MessageService],
     template: `
         <app-floating-configurator />
         <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
@@ -54,7 +57,6 @@ import { AuthService } from './service/auth.service';
                                     <label for="rememberme1">Remember me</label>
                                 </div>
                                 <a [routerLink]="['/forgot-password']" class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</a>
-
                             </div>
                             <p-button label="Sign In" styleClass="w-full" (click)="login()"></p-button>
                         </div>
@@ -71,34 +73,69 @@ export class Login {
 
     checked: boolean = false;
 
-    constructor(private auth: AuthService ,private router: Router) {}
+    constructor(
+        private auth: AuthService,
+        private router: Router,
+        private messageService: MessageService
+    ) {}
 
-  login() {
-  this.auth.login({ email: this.email, password: this.password }).subscribe({
-    next: (res) => {
-      if (res.access && res.refresh) {
-        // Guarda en localStorage o sessionStorage según "remember me"
-        this.auth.setTokens(
-          { access: res.access, refresh: res.refresh },
-          this.checked // <= esto viene del checkbox "remember me"
-        );
-        this.router.navigate(['/']);
-      } else if (res.detail?.includes('MFA')) {
-        alert('MFA requerido');
-      } else {
-        alert('Respuesta inesperada del servidor');
-      }
-    },
-    error: (err) => {
-      console.error('Error login:', err);
-      alert('Credenciales incorrectas');
-    }
-  });
+    login() {
+    this.auth.login({ email: this.email, password: this.password }).subscribe({
+        next: (res) => {
+            if (res.access && res.refresh && res.user) {
+                this.auth.setTokens(
+                    { access: res.access, refresh: res.refresh },
+                    this.checked,
+                    res.user
+                );
+
+                 const roles = res.user.roles;
+                    const role = roles && roles.length > 0 ? roles[0].name : null;
+
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Inicio de sesión',
+                    detail: 'Redirigiendo...'
+                });
+
+
+                    if (role === 'Super-Admin') {
+                    this.router.navigate(['admin/dashboard']);
+                    } else if (role === 'Admin') {
+                    this.router.navigate(['/dashboard']);
+                    } else if (role === 'ClientStaff') {
+                    this.router.navigate(['/staff/home']); // si lo implementas
+                    } else {
+                    this.router.navigate(['/access']); // o una página de acceso denegado
+                    }
+
+            } else if (res.detail?.includes('MFA')) {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error de MFA',
+                    detail: 'Por favor, completa la autenticación de múltiples factores.',
+                    life: 5000
+                });
+            } else {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Respuesta inesperada',
+                    detail: 'No se recibieron tokens válidos.',
+                    life: 5000
+                });
+            }
+        },
+        error: (err) => {
+            console.error('Error login:', err);
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error de inicio de sesión',
+                detail: 'Correo o contraseña incorrectos',
+                life: 5000
+            });
+        }
+    });
 }
 
-
-
 }
-
-
 
