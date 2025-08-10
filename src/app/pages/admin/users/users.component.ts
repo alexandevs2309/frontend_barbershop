@@ -38,8 +38,6 @@ import { LazyLoadEvent } from 'primeng/api';
                 <span class="p-input-icon-left">
                     <i class="pi pi-search"></i>
                     <input pInputText type="text" placeholder="Buscar (nombre o email)" [(ngModel)]="search" (input)="onSearchInput()" style="width: 260px" />
-
-
                 </span>
 
                 <span class="flex-1"></span>
@@ -109,9 +107,7 @@ import { LazyLoadEvent } from 'primeng/api';
 
                 <ng-template pTemplate="emptymessage">
                     <tr>
-                    <td colspan="7" class="text-center p-4 font-bold text-lg text-red-500">
-                        Sin resultados para “{{ search }}”.
-                    </td>
+                        <td colspan="7" class="text-center p-4 font-bold text-lg text-red-500">Sin resultados para “{{ search }}”.</td>
                     </tr>
                 </ng-template>
             </p-table>
@@ -127,12 +123,7 @@ import { LazyLoadEvent } from 'primeng/api';
                 <div class="flex justify-end gap-2">
                     <button pButton label="Cancelar" (click)="showPwdDialog = false" class="p-button-text"></button>
 
-                    <button pButton label="Guardar" icon="pi pi-check"
-        [disabled]="!newPassword || newPassword.length < 8 || submittingPwd"
-        (click)="submitPassword()">
-</button>
-
-
+                    <button pButton label="Guardar" icon="pi pi-check" [disabled]="!newPassword || newPassword.length < 8 || submittingPwd" (click)="submitPassword()"></button>
                 </div>
             </div>
         </p-dialog>
@@ -165,9 +156,7 @@ import { LazyLoadEvent } from 'primeng/api';
     `
 })
 export class UsersComponent {
-
-   submittingPwd = false;
-
+    submittingPwd = false;
 
     // tabla
     users: User[] = [];
@@ -368,22 +357,22 @@ export class UsersComponent {
     }
 
     submitPassword() {
-  if (!this.targetUserId || !this.newPassword || this.newPassword.length < 8) return;
-  this.submittingPwd = true;
-  this.usersService.changePassword(this.targetUserId, this.newPassword).subscribe({
-    next: () => {
-      this.messageService.add({ severity: 'success', summary: 'OK', detail: 'Contraseña actualizada' });
-      this.showPwdDialog = false;
-      this.newPassword = '';
-      this.submittingPwd = false;
-    },
-    error: (err) => {
-      const detail = err?.error?.detail || err?.error?.error || 'No se pudo actualizar';
-      this.messageService.add({ severity: 'error', summary: 'Error', detail });
-      this.submittingPwd = false;
+        if (!this.targetUserId || !this.newPassword || this.newPassword.length < 8) return;
+        this.submittingPwd = true;
+        this.usersService.changePassword(this.targetUserId, this.newPassword).subscribe({
+            next: () => {
+                this.messageService.add({ severity: 'success', summary: 'OK', detail: 'Contraseña actualizada' });
+                this.showPwdDialog = false;
+                this.newPassword = '';
+                this.submittingPwd = false;
+            },
+            error: (err) => {
+                const detail = err?.error?.detail || err?.error?.error || 'No se pudo actualizar';
+                this.messageService.add({ severity: 'error', summary: 'Error', detail });
+                this.submittingPwd = false;
+            }
+        });
     }
-  });
-}
 
     // ====== Logs
     openLogs(userId: number) {

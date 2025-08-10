@@ -15,7 +15,7 @@ import { RoleService, Role } from '../roles/roles.service';
 @Component({
     selector: 'app-user-form',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, DialogModule, InputTextModule, DropdownModule, ToggleButtonModule, ButtonModule, FloatLabel, PasswordModule , ToggleSwitchModule],
+    imports: [CommonModule, ReactiveFormsModule, DialogModule, InputTextModule, DropdownModule, ToggleButtonModule, ButtonModule, FloatLabel, PasswordModule, ToggleSwitchModule],
     template: `
         <p-dialog header="{{ editingUser ? 'Editar Usuario' : 'Nuevo Usuario' }}" [(visible)]="visible" [modal]="true" [closable]="true" [style]="{ width: '50rem' }" (onHide)="onClose()" class="user-form-dialog h-full">
             <form [formGroup]="userForm" class="p-fluid" (ngSubmit)="onSubmit()">
@@ -32,14 +32,13 @@ import { RoleService, Role } from '../roles/roles.service';
                         <label for="email">Correo</label>
                     </p-floatlabel>
                 </div>
-               <!-- SOLO creación (cuando no hay editingUser?.id) -->
-                    <div class="field my-4" *ngIf="!editingUser?.id">
+                <!-- SOLO creación (cuando no hay editingUser?.id) -->
+                <div class="field my-4" *ngIf="!editingUser?.id">
                     <p-floatlabel variant="on">
                         <p-password formControlName="password" inputId="password" [toggleMask]="true" />
                         <label for="password">Password</label>
                     </p-floatlabel>
-                    </div>
-
+                </div>
 
                 <div class="field my-4">
                     <p-dropdown formControlName="role_ids" [options]="roles" optionLabel="label" optionValue="value" placeholder="Seleccionar rol" class="w-full"> </p-dropdown>
@@ -47,8 +46,7 @@ import { RoleService, Role } from '../roles/roles.service';
 
                 <div class="field my-4 block">
                     <label for="isActive">Estado</label>
-                    <p-toggleButton id="isActive" formControlName="isActive" onLabel="Activo" offLabel="Inactivo" onIcon="pi pi-check" offIcon="pi pi-times"
-                    > </p-toggleButton>
+                    <p-toggleButton id="isActive" formControlName="isActive" onLabel="Activo" offLabel="Inactivo" onIcon="pi pi-check" offIcon="pi pi-times"> </p-toggleButton>
                 </div>
 
                 <div class="text-right mt-4">
@@ -69,7 +67,10 @@ export class UserFormComponent implements OnInit, OnChanges {
 
     roles: { label: string; value: number }[] = [];
 
-    constructor(private fb: FormBuilder, private roleService: RoleService) {
+    constructor(
+        private fb: FormBuilder,
+        private roleService: RoleService
+    ) {
         this.initForm();
     }
 
@@ -77,12 +78,12 @@ export class UserFormComponent implements OnInit, OnChanges {
         this.roleService.getRoles().subscribe({
             next: (data: Role[]) => {
                 console.log('[DEBUG] Respuesta roles:', data);
-                this.roles = data.map(role => ({
+                this.roles = data.map((role) => ({
                     label: role.name,
                     value: role.id
                 }));
             },
-            error: err => console.error('[ERROR] Cargando roles:', err)
+            error: (err) => console.error('[ERROR] Cargando roles:', err)
         });
     }
 
@@ -93,7 +94,7 @@ export class UserFormComponent implements OnInit, OnChanges {
             this.userForm.patchValue({
                 fullName: this.editingUser.full_name,
                 email: this.editingUser.email,
-                role_ids: this.editingUser.roles?.map(r => r.id) ?? [],
+                role_ids: this.editingUser.roles?.map((r) => r.id) ?? [],
                 isActive: this.editingUser.is_active
             });
 
