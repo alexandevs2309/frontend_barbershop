@@ -3,8 +3,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environment';
-import { Observable, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { Observable, throwError ,BehaviorSubject   } from 'rxjs';
+import { tap, catchError, distinctUntilChanged ,map} from 'rxjs/operators';
+import { User } from '../../admin/users/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -14,13 +15,32 @@ export class AuthService {
   private resetPasswordUrl = `${environment.apiUrl}/auth/reset-password/`;
   private changePasswordUrl = `${environment.apiUrl}/auth/change-password/`;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  private currentUser = new BehaviorSubject<User | null>(null)
+  currentUser$: Observable< User | null> = this.currentUser.asObservable();
+  userId$ = this.currentUser$.pipe(
+      map(u => u?.id ?? null),
+      distinctUntilChanged()
+  );
+
+
+  constructor(private http: HttpClient, private router: Router) {
+  const raw = localStorage.getItem('user') || sessionStorage.getItem('user');
+    if (raw) {
+      try { this.currentUser.next(JSON.parse(raw)); } catch {}
+    }
+  }
+
+
+ setCurrentUser(user: User | null) {
+    this.currentUser.next(user);
+  }
 
   /**
    * Login con credenciales y obtención de tokens.
    */
   login(credentials: { email: string; password: string }): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
 
     return this.http.post<any>(this.loginUrl, credentials, { headers }).pipe(
       tap((res) => {
@@ -118,12 +138,14 @@ getUserRole(): string | null {
    * Eliminar tokens al cerrar sesión
    */
   logout(): void {
+    this.setCurrentUser(null)
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
     sessionStorage.removeItem('access_token');
     sessionStorage.removeItem('refresh_token');
     sessionStorage.removeItem('user');
+
     this.router.navigate(['/login']);
   }
 

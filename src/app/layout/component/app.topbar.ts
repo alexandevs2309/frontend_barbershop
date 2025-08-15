@@ -78,7 +78,7 @@ import { Router } from '@angular/router';
                     <button type="button" class="layout-topbar-action"  (click)="overlay.toggle($event)">
                         <i class="pi pi-user"></i>
                         <span>Profile</span>
-                       
+
                     </button>
 
                     <p-overlayPanel #overlay>
@@ -108,7 +108,7 @@ import { Router } from '@angular/router';
                             </li>
 
                             <li>
-                                <button pButton class="w-full text-left p-button-text text-lg my-2" (click)="goToProfile()">
+                                <button pButton class="w-full text-left p-button-text text-lg my-2" (click)="goToSubscriptions()">
                                 <i class="pi pi-briefcase mr-2"></i> subscription
                                 </button>
                             </li>
@@ -139,6 +139,11 @@ export class AppTopbar {
     goToProfile() {
      this.router.navigate(['/profile']);
         // Logic to navigate to the user profile page
+    }
+
+    goToSubscriptions(){
+        this.router.navigate(['/admin/plans/subscriptions-center']);
+
     }
 
     toggleDarkMode() {

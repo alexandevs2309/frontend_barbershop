@@ -8,14 +8,14 @@ import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
 import { AuthService } from './service/auth.service';
-import { ToastModule } from 'primeng/toast';
+import { EntitlementsService } from '../../layout/service/entitlements.service';
 import { MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-login',
     standalone: true,
     imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator],
-    providers: [MessageService],
+    providers: [MessageService ],
     template: `
         <app-floating-configurator />
         <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
@@ -76,7 +76,8 @@ export class Login {
     constructor(
         private auth: AuthService,
         private router: Router,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private entitlementsService: EntitlementsService
     ) {}
 
     login() {
@@ -124,6 +125,14 @@ export class Login {
                     life: 5000
                 });
             }
+            this.auth.setCurrentUser(res.user);
+             // 🔑 resuelves el “tengo que recargar” aquí:
+          // 1) limpia el estado previo
+          this.entitlementsService.clear();
+          // 2) refresca con el nuevo token guardado
+          this.entitlementsService.refresh().subscribe(); // no hace falta manejar valor aquí
+
+
         },
         error: (err) => {
             console.error('Error login:', err);
