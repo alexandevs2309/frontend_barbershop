@@ -6,14 +6,19 @@ import { environment } from '../../../../environment';
 import { Observable, throwError ,BehaviorSubject   } from 'rxjs';
 import { tap, catchError, distinctUntilChanged ,map} from 'rxjs/operators';
 import { User } from '../../admin/users/user.model';
+import { AuditLog } from '../../admin/audit-log/audit.model';
+import { AuditLogResponse } from '../../admin/users/log.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private loginUrl = `${environment.apiUrl}/auth/login/`;
-  private resetPasswordUrl = `${environment.apiUrl}/auth/reset-password/`;
-  private changePasswordUrl = `${environment.apiUrl}/auth/change-password/`;
+  readonly baseUrl = environment.apiUrl;
+  private loginUrl = `${this.baseUrl}/auth/login/`;
+  private resetPasswordUrl = `${this.baseUrl}/auth/reset-password/`;
+  private changePasswordUrl = `${this.baseUrl}/auth/change-password/`;
+
+  private auditLogUrl = `${this.baseUrl}/audit/logs/`;
 
   private currentUser = new BehaviorSubject<User | null>(null)
   currentUser$: Observable< User | null> = this.currentUser.asObservable();
@@ -167,4 +172,12 @@ getUserRole(): string | null {
   private getStorage(): Storage {
     return localStorage.getItem('access_token') ? localStorage : sessionStorage;
   }
+
+
+ getAuditLogs(): Observable<AuditLogResponse> {
+  return this.http.get<AuditLogResponse>(this.auditLogUrl);
 }
+
+}
+export type { AuditLog };
+

@@ -7,11 +7,3 @@ export interface AuditLog {
   timestamp: string;
   changes: any;
 }
-
-export interface AuditLogResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: AuditLog[];
-}
-

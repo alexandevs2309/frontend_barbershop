@@ -1,0 +1,14 @@
+:host ::ng-deep {
+  .p-tag-success {
+    background: #c8e6c9 !important;
+    color: #256029 !important;
+  }
+  .p-tag-warning {
+    background: #fff8e1 !important;
+    color: #8a6d3b !important;
+  }
+  .p-tag-danger {
+    background: #ffcdd2 !important;
+    color: #b71c1c !important;
+  }
+}

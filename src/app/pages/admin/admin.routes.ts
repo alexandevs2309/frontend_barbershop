@@ -23,10 +23,9 @@ export const adminRoutes: Routes = [
       },
 
       { path: 'tenants', loadComponent: () => import('./tenants/tenants.component').then(m => m.TenantsComponent) },
-      { path: 'subscriptions', loadComponent: () => import('./subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent) },
       { path: 'settings', loadComponent: () => import('./settings/settings.component').then(m => m.SettingsComponent) },
       { path: 'roles', loadComponent: () => import('./roles/roles.component').then(m => m.RolesComponent) },
-      { path: 'audit-log', loadComponent: () => import('./audit-log/audit-log.component').then(m => m.AuditLogComponent) }
+      { path: 'audit-log', loadComponent: () => import('./audit-log/audit-log.component').then(m => m.AuditComponent) }
     ]
   }
 ];

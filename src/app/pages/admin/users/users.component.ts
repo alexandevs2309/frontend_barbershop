@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { UsersService } from './users.service';
 import { User } from './user.model';
-import { UserLog } from './log.model';
+import { AuditLog } from './log.model';
 
 import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
@@ -185,7 +185,7 @@ export class UsersComponent {
 
     // logs
     showLogsDialog = false;
-    logs: UserLog[] = [];
+    logs: AuditLog[] = [];
     logsLoading = false;
 
     trackById = (_: number, u: User) => u.id;
