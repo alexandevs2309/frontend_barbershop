@@ -3,31 +3,50 @@ import { CommonModule } from '@angular/common';
 import { TableModule } from "primeng/table";
 import { ButtonModule } from 'primeng/button';
 import { RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-widget-admin',
   imports: [CommonModule, TableModule, ButtonModule, RouterModule,],
   template: `
-  
-  <div class="col-span-12 lg:col-span-6 xl:col-span-3" *ngFor="let card of summaryCards">
-            <div class="card mb-0">
-                <div class="flex justify-between mb-4">
-                    <div>
-                        <span class="block text-xl font-bold mb-4">{{card.title}}</span>
-                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl"></div>
-                    </div>
-                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem" >
-                    <i [ngClass]="card.icon + ' text-blue-500 text-xl'"></i>
 
-                  </div>
-                </div>
-                <span class=" text-2xl mx-2"  [style.background]="card.color">{{card.value}}</span>
-                <span class="text-muted-color">since last visit</span>
-            </div>
+  <!-- Tarjetas de resumen -->
+  <div class="col-span-12 lg:col-span-6 xl:col-span-3" *ngFor="let card of summaryCards">
+    <div class="card mb-0">
+      <div class="flex justify-between mb-4">
+        <div>
+          <span class="block text-xl font-bold mb-4">{{card.title}}</span>
+          <div class="text-surface-900 dark:text-surface-0 font-medium text-xl"></div>
         </div>
-  
+        <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem" >
+          <i [ngClass]="card.icon + ' text-blue-500 text-xl'"></i>
+        </div>
+      </div>
+      <span class=" text-2xl mx-2"  [style.background]="card.color">{{card.value}}</span>
+      <span class="text-muted-color">since last visit</span>
+    </div>
+  </div>
+
+  <!-- Botones de acceso rápido -->
+  <div class="col-span-12">
+    <div class="card">
+      <h5 class="mb-4">Acceso Rápido</h5>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+       <button *ngFor="let item of quickAccess"
+        pButton
+        [icon]="item.icon"
+        [label]="item.label"
+        class="p-button-outlined"
+        (click)="item.command()">
+</button>
+
+      </div>
+    </div>
+  </div>
+
   `
-  
+
 })
 export class WidgetAdminComponent {
  summaryCards = [
@@ -43,12 +62,13 @@ export class WidgetAdminComponent {
     { event: 'Fallo de pago', user: 'Stylo Studio', date: new Date(), type: 'Error', severity: 'danger', icon: 'pi pi-times' }
   ];
 
-  quickAccess = [
-    { label: 'Ver Logs', icon: 'pi pi-eye', route: '/admin/logs' },
-    { label: 'Crear Plan', icon: 'pi pi-plus', route: '/admin/plans' },
-    { label: 'Usuarios', icon: 'pi pi-users', route: '/admin/users' },
-    { label: 'Tenants', icon: 'pi pi-briefcase', route: '/admin/tenants' }
-  ];
+quickAccess = [
+  { label: 'Ver Logs', icon: 'pi pi-eye', command: () => this.router.navigate(['/admin/audit-log']) },
+  { label: 'Crear Plan', icon: 'pi pi-plus', command: () => this.router.navigate(['/admin/plans']) },
+  { label: 'Usuarios', icon: 'pi pi-users', command: () => this.router.navigate(['/admin/users']) },
+  { label: 'Tenants', icon: 'pi pi-briefcase', command: () => this.router.navigate(['/admin/tenants']) }
+];
+
 
 lineChartData = {
   labels: ['Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul'],
@@ -105,7 +125,7 @@ pieChartData = {
 };
 
 
-  constructor() {}
+constructor(private router: Router) {}
 
   ngOnInit(): void {}
 }

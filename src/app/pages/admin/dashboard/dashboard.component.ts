@@ -29,12 +29,7 @@ export class DashboardComponent implements OnInit {
     { event: 'Fallo de pago', user: 'Stylo Studio', date: new Date(), type: 'Error', severity: 'danger', icon: 'pi pi-times' }
   ];
 
-  quickAccess = [
-    { label: 'Ver Logs', icon: 'pi pi-eye', route: '/admin/logs' },
-    { label: 'Crear Plan', icon: 'pi pi-plus', route: '/admin/plans' },
-    { label: 'Usuarios', icon: 'pi pi-users', route: '/admin/users' },
-    { label: 'Tenants', icon: 'pi pi-briefcase', route: '/admin/tenants' }
-  ];
+
 
 lineChartData = {
   labels: ['Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul'],

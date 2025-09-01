@@ -21,11 +21,13 @@ function joinUrl(base: string, path: string): string {
   return base + path;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class PlansService {
   // 1) Base de la API desde environment
-  private readonly baseUrl = environment.apiUrl;               // p.ej. 'http://localhost:8000/api'
-  private readonly plansUrl = joinUrl(this.baseUrl, 'subscriptions/plans/'); // '.../api/subscriptions/plans/'
+  private readonly baseUrl = environment.apiUrl;
+  private readonly plansUrl = joinUrl(this.baseUrl, 'subscriptions/plans/');
 
   constructor(private http: HttpClient) {}
 

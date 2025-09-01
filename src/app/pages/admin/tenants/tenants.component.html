@@ -1,1 +1,248 @@
-<p>tenants works!</p>
+<div class="card">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <div class="flex justify-content-between align-items-center mb-4">
+    <h1>Gestión de Tenants</h1>
+    <p-button
+      label="Nuevo Tenant"
+      icon="pi pi-plus"
+      (onClick)="openNew()"
+      [raised]="true"
+      severity="success">
+    </p-button>
+  </div>
+
+  <p-table
+    [value]="tenants"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="10"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} tenants"
+    [rowsPerPageOptions]="[10, 25, 50]">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre</th>
+        <th>Subdominio</th>
+        <th>Email de Contacto</th>
+        <th>Plan de Suscripción</th>
+        <th>Límite Usuarios</th>
+        <th>Límite Empleados</th>
+        <th>Estado</th>
+        <th>Fecha Creación</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-tenant>
+      <tr [class]="!tenant.is_active ? 'inactive-tenant' : ''">
+        <td [class]="!tenant.is_active ? 'text-gray-500' : ''">{{ tenant.name }}</td>
+        <td [class]="!tenant.is_active ? 'text-gray-500' : ''">{{ tenant.subdomain }}</td>
+        <td [class]="!tenant.is_active ? 'text-gray-500' : ''">{{ tenant.contact_email }}</td>
+        <td [class]="!tenant.is_active ? 'text-gray-500' : ''">{{ tenant.plan_type }}</td>
+        <td [class]="!tenant.is_active ? 'text-gray-500' : ''">{{ tenant.max_users }}</td>
+        <td [class]="!tenant.is_active ? 'text-gray-500' : ''">{{ tenant.max_employees }}</td>
+        <td>
+          <p-tag
+            [value]="getStatusLabel(tenant.is_active)"
+            [severity]="getStatusSeverity(tenant.is_active)">
+          </p-tag>
+        </td>
+        <td [class]="!tenant.is_active ? 'text-gray-500' : ''">{{ tenant.created_at | date:'short' }}</td>
+        <td>
+          <div class="flex gap-2">
+            <p-button
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [text]="true"
+              severity="secondary"
+              (onClick)="editTenant(tenant)"
+              [disabled]="!tenant.is_active">
+            </p-button>
+
+            <p-button
+              *ngIf="tenant.is_active"
+              icon="pi pi-ban"
+              [rounded]="true"
+              [text]="true"
+              severity="warn"
+              (onClick)="deactivateTenant(tenant)"
+              tooltip="Desactivar">
+            </p-button>
+
+            <p-button
+              *ngIf="!tenant.is_active"
+              icon="pi pi-check"
+              [rounded]="true"
+              [text]="true"
+              severity="success"
+              (onClick)="activateTenant(tenant)"
+              tooltip="Activar">
+            </p-button>
+
+            <p-button
+              icon="pi pi-trash"
+              [rounded]="true"
+              [text]="true"
+              severity="danger"
+              (onClick)="deleteTenant(tenant)">
+            </p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="9" class="text-center">
+          No se encontraron tenants.
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Dialog para crear/editar tenant -->
+<p-dialog
+  [(visible)]="tenantDialog"
+  [style]="{ width: '600px' }"
+  header="Gestionar Tenant"
+  [modal]="true"
+  [closable]="false">
+
+  <form (ngSubmit)="saveTenant()" class="p-fluid">
+    <div class="field mb-3">
+      <label for="name">Nombre del Tenant *</label>
+      <input
+        id="name"
+        pInputText
+        [(ngModel)]="tenant.name"
+        name="name"
+        required
+        autofocus
+        [class]="{'ng-invalid ng-dirty': submitted && !tenant.name}">
+      <small *ngIf="submitted && !tenant.name" class="p-error">
+        El nombre es requerido
+      </small>
+    </div>
+
+    <div class="field mb-3">
+      <label for="subdomain">Subdominio *</label>
+      <input
+        id="subdomain"
+        pInputText
+        [(ngModel)]="tenant.subdomain"
+        name="subdomain"
+        required
+        placeholder="ejemplo-subdominio"
+        [class]="{'ng-invalid ng-dirty': submitted && !tenant.subdomain}">
+      <small *ngIf="submitted && !tenant.subdomain" class="p-error">
+        El subdominio es requerido
+      </small>
+    </div>
+
+    <div class="field mb-3">
+      <label for="email">Email de Contacto *</label>
+      <input
+        id="email"
+        type="email"
+        pInputText
+        [(ngModel)]="tenant.contact_email"
+        name="contact_email"
+        required
+        [class]="{'ng-invalid ng-dirty': submitted && !tenant.contact_email}">
+      <small *ngIf="submitted && !tenant.contact_email" class="p-error">
+        El email es requerido
+      </small>
+    </div>
+
+    <div class="field mb-3">
+      <label for="phone">Teléfono</label>
+      <input
+        id="phone"
+        pInputText
+        [(ngModel)]="tenant.contact_phone"
+        name="contact_phone">
+    </div>
+
+    <div class="field mb-3">
+      <label for="address">Dirección</label>
+      <textarea
+        id="address"
+        pInputTextarea
+        [(ngModel)]="tenant.address"
+        name="address"
+        rows="3">
+      </textarea>
+    </div>
+
+    <div class="field mb-3">
+      <label for="plan_type">Plan de Suscripción *</label>
+      <p-dropdown
+        id="plan_type"
+        [(ngModel)]="tenant.plan_type"
+        name="plan_type"
+        [options]="subscriptionPlans"
+        optionLabel="name"
+        optionValue="name"
+        placeholder="Selecciona un plan"
+        required
+        [class]="{'ng-invalid ng-dirty': submitted && !tenant.plan_type}">
+      </p-dropdown>
+      <small *ngIf="submitted && !tenant.plan_type" class="p-error">
+        El plan de suscripción es requerido
+      </small>
+    </div>
+
+    <div class="field mb-3">
+      <label for="max_users">Límite Máximo de Usuarios</label>
+      <p-inputNumber
+        id="max_users"
+        [(ngModel)]="tenant.max_users"
+        name="max_users"
+        [min]="1"
+        [showButtons]="true">
+      </p-inputNumber>
+    </div>
+
+    <div class="field mb-3">
+      <label for="max_employees">Límite Máximo de Empleados</label>
+      <p-inputNumber
+        id="max_employees"
+        [(ngModel)]="tenant.max_employees"
+        name="max_employees"
+        [min]="1"
+        [showButtons]="true">
+      </p-inputNumber>
+    </div>
+
+    <div class="field mb-3">
+      <label for="is_active">Estado</label>
+      <p-dropdown
+        id="is_active"
+        [(ngModel)]="tenant.is_active"
+        name="is_active"
+        [options]="[{label: 'Activo', value: true}, {label: 'Inactivo', value: false}]"
+        optionLabel="label"
+        optionValue="value">
+      </p-dropdown>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      (onClick)="hideDialog()"
+      [text]="true">
+    </p-button>
+    <p-button
+      label="Guardar"
+      icon="pi pi-check"
+      (onClick)="saveTenant()"
+      [autofocus]="true">
+    </p-button>
+  </ng-template>
+</p-dialog>

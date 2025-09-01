@@ -1,9 +1,9 @@
 <!-- Tarjetas KPI -->
 <div class="grid grid-cols-12 gap-8">
        <app-widget-admin class="contents " />
-            
+
       <div class="col-span-12 xl:col-span-6">
-               
+
   </div>
 
 </div>
@@ -28,7 +28,7 @@
 <!-- Actividad reciente -->
 <div class="mt-4">
   <p-card header="Actividad reciente">
-    <p-table [value]="activities" [scrollable]="true" scrollHeight="250px"> 
+    <p-table [value]="activities" [scrollable]="true" scrollHeight="250px">
       <ng-template pTemplate="header">
         <tr>
           <th>Evento</th>
@@ -51,13 +51,4 @@
   </p-card>
 </div>
 
-<!-- Accesos rápidos -->
-<div class="grid mt-5">
-  <div class="col-12 md:col-6 xl:col-3 my-2" *ngFor="let quick of quickAccess">
-    <button pButton type="button" class="w-full p-button-lg" 
-            [label]="quick.label" 
-            [icon]="quick.icon" 
-            [routerLink]="quick.route"
-            style="height: 4rem;"></button>
-  </div>
-</div>
+
