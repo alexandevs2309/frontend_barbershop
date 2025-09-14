@@ -7,7 +7,7 @@ export const adminRoutes: Routes = [
     path: '',
     canActivate: [AuthGuard],
     canActivateChild: [AuthGuardChild],
-    data: { allowedRoles: ['Super-Admin'] },
+    data: { allowedRoles: ['Super-Admin', 'Soporte'] },
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
       { path: 'dashboard', loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent) },
@@ -23,9 +23,10 @@ export const adminRoutes: Routes = [
       },
 
       { path: 'tenants', loadComponent: () => import('./tenants/tenants.component').then(m => m.TenantsComponent) },
-      { path: 'settings', loadComponent: () => import('./settings/settings.component').then(m => m.SettingsComponent) },
-      { path: 'roles', loadComponent: () => import('./roles/roles.component').then(m => m.RolesComponent) },
-      { path: 'audit-log', loadComponent: () => import('./audit-log/audit-log.component').then(m => m.AuditComponent) }
+      { path: 'system-settings', loadComponent: () => import('./system-settings/system-settings.component').then(m => m.SystemSettingsComponent) },
+      { path: 'roles', loadComponent: () => import('./roles/roles.component').then(m => m.RoleComponent) },
+      { path: 'audit-log', loadComponent: () => import('./audit-log/audit-log.component').then(m => m.AuditComponent) },
+      { path: 'reports', loadComponent: () => import('./reports/reports.component').then(m => m.ReportsComponent) }
     ]
   }
 ];

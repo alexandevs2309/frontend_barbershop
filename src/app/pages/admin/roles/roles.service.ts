@@ -4,8 +4,21 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../../../../environment';
 
 export interface Role {
-  id: number;
+  id?: number;
   name: string;
+  description?: string;
+  scope: 'GLOBAL' | 'TENANT' | 'MODULE';
+  module?: string | null;
+  limits?: { [key: string]: any };
+  permissions: number[]; // IDs de permisos
+}
+
+export interface Permission {
+  id: number;
+  codename: string;
+  name: string;
+  app_label: string;
+  model: string;
 }
 
 @Injectable({
@@ -16,34 +29,41 @@ export class RoleService {
 
   constructor(private http: HttpClient) {}
 
-  // Listar todos los roles
+  // Listar roles
   getRoles(): Observable<Role[]> {
     return this.http.get<{ results: Role[] }>(this.apiUrl).pipe(
       map(response => response.results)
     );
   }
 
-  // Obtener un rol por ID
+  // Obtener rol por ID
   getRole(id: number): Observable<Role> {
     return this.http.get<Role>(`${this.apiUrl}${id}/`);
   }
 
-  // Crear un nuevo rol
-  createRole(role: { name: string }): Observable<Role> {
+  // Crear rol
+  createRole(role: Role): Observable<Role> {
     return this.http.post<Role>(this.apiUrl, role);
   }
 
-  // Actualizar un rol existente
-  updateRole(id: number, role: { name: string }): Observable<Role> {
+  // Actualizar rol
+  updateRole(id: number, role: Role): Observable<Role> {
     return this.http.put<Role>(`${this.apiUrl}${id}/`, role);
   }
 
-  // Eliminar un rol
+  // Eliminar rol
   deleteRole(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}${id}/`);
   }
 
-  // Asignar roles a un usuario
+  // Obtener todos los permisos disponibles
+  getPermissions(): Observable<Permission[]> {
+    return this.http.get<{ results: Permission[] }>(`${environment.apiUrl}/roles/roles/permissions/`).pipe(
+      map(response => response.results || [])
+    );
+  }
+
+  // Asignar roles a usuario (si tu backend lo soporta)
   assignRolesToUser(userId: number, roleIds: number[]): Observable<any> {
     return this.http.patch(`${environment.apiUrl}/users/users/${userId}/`, {
       roles: roleIds

@@ -237,14 +237,14 @@ export class UsersComponent {
 
         this.loading = true;
         // Usa list() para enviar params al backend
-        this.usersService.list(params).subscribe({
+        this.usersService.getUsers().subscribe({
             next: (res: any) => {
                 this.users = res.results ?? res;
                 this.total = res.count ?? (Array.isArray(res) ? res.length : this.total);
                 if (params.page_size) this.pageSize = params.page_size;
                 this.loading = false;
             },
-            error: (err) => {
+            error: (err: any) => {
                 this.loading = false;
                 console.error('[UsersComponent] Error al cargar usuarios:', err);
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar usuarios' });
@@ -255,13 +255,7 @@ export class UsersComponent {
     // ====== Exportar CSV (usa el mismo filtro de búsqueda)
     exportCsv() {
         const q = { search: this.search?.trim() || undefined };
-        this.usersService.exportUsers(q).subscribe((blob) => {
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'usuarios.csv';
-            a.click();
-            URL.revokeObjectURL(a.href);
-        });
+        this.messageService.add({ severity: 'info', summary: 'Próximamente', detail: 'Función de exportar en desarrollo' });
     }
 
     // ====== CRUD UI
@@ -305,47 +299,27 @@ export class UsersComponent {
             header: 'Confirmar eliminación',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.usersService.deleteUser(user.id).subscribe({
-                    next: () => {
-                        this.users = this.users.filter((u) => u.id !== user.id);
-                        this.messageService.add({ severity: 'success', summary: 'Usuario eliminado' });
-                    },
-                    error: (err) => {
-                        const detail = err?.error?.detail || 'Ocurrió un error al eliminar el usuario.';
-                        this.messageService.add({ severity: 'error', summary: 'Error', detail });
-                    }
-                });
+                this.messageService.add({ severity: 'info', summary: 'Próximamente', detail: 'Función de eliminar en desarrollo' });
             }
         });
     }
 
     saveUser(user: User) {
         if (user.id) {
-            this.usersService.updateUser(user).subscribe({
+            this.usersService.updateUser(user.id, user).subscribe({
                 next: (updated) => {
                     const idx = this.users.findIndex((u) => u.id === updated.id);
                     if (idx !== -1) this.users[idx] = updated;
                     this.messageService.add({ severity: 'success', summary: 'Usuario actualizado' });
                 },
-                error: (err) => {
+                error: (err: any) => {
                     const e = err?.error;
                     const detail = (e?.email && e.email.join ? e.email.join(', ') : e?.email) || (e?.role_ids && e.role_ids.join ? e.role_ids.join(', ') : e?.role_ids) || e?.detail || 'No se pudo actualizar el usuario';
                     this.messageService.add({ severity: 'error', summary: 'Error', detail });
                 }
             });
         } else {
-            this.usersService.createUser(user).subscribe({
-                next: (created) => {
-                    // Opcional: recargar para mantener orden/paginación consistentes
-                    this.reload();
-                    this.messageService.add({ severity: 'success', summary: 'Usuario creado' });
-                },
-                error: (err) => {
-                    const e = err?.error;
-                    const detail = (e?.email && e.email.join ? e.email.join(', ') : e?.email) || (e?.role_ids && e.role_ids.join ? e.role_ids.join(', ') : e?.role_ids) || e?.detail || 'No se pudo crear el usuario';
-                    this.messageService.add({ severity: 'error', summary: 'Error', detail });
-                }
-            });
+            this.messageService.add({ severity: 'info', summary: 'Próximamente', detail: 'Función de crear usuario en desarrollo' });
         }
     }
 
@@ -359,19 +333,9 @@ export class UsersComponent {
     submitPassword() {
         if (!this.targetUserId || !this.newPassword || this.newPassword.length < 8) return;
         this.submittingPwd = true;
-        this.usersService.changePassword(this.targetUserId, this.newPassword).subscribe({
-            next: () => {
-                this.messageService.add({ severity: 'success', summary: 'OK', detail: 'Contraseña actualizada' });
-                this.showPwdDialog = false;
-                this.newPassword = '';
-                this.submittingPwd = false;
-            },
-            error: (err) => {
-                const detail = err?.error?.detail || err?.error?.error || 'No se pudo actualizar';
-                this.messageService.add({ severity: 'error', summary: 'Error', detail });
-                this.submittingPwd = false;
-            }
-        });
+        this.messageService.add({ severity: 'info', summary: 'Próximamente', detail: 'Función de cambiar contraseña en desarrollo' });
+        this.showPwdDialog = false;
+        this.submittingPwd = false;
     }
 
     // ====== Logs
@@ -379,12 +343,7 @@ export class UsersComponent {
         this.logs = [];
         this.logsLoading = true;
         this.showLogsDialog = true;
-        this.usersService.getUserLogs(userId).subscribe({
-            next: (res: any) => {
-                this.logs = res.results ?? res;
-                this.logsLoading = false;
-            },
-            error: () => (this.logsLoading = false)
-        });
+        this.messageService.add({ severity: 'info', summary: 'Próximamente', detail: 'Función de logs en desarrollo' });
+        this.logsLoading = false;
     }
 }

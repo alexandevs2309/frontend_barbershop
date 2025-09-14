@@ -79,6 +79,23 @@ export class LayoutService {
     private initialized = false;
 
     constructor() {
+
+
+        const saved = localStorage.getItem('layoutConfig');
+    if (saved) {
+        try {
+            this._config = JSON.parse(saved);
+            this.layoutConfig.set(this._config);
+
+            // Aplica el modo oscuro si estaba activado
+            this.toggleDarkMode(this._config);
+        } catch (e) {
+            console.error('Error parsing layoutConfig from localStorage', e);
+        }
+    }
+
+
+
         effect(() => {
             const config = this.layoutConfig();
             if (config) {
@@ -165,6 +182,8 @@ export class LayoutService {
 
     onConfigUpdate() {
         this._config = { ...this.layoutConfig() };
+        localStorage.setItem('layoutConfig', JSON.stringify(this._config));
+
         this.configUpdate.next(this.layoutConfig());
     }
 

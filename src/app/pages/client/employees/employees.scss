@@ -1,0 +1,73 @@
+/* Tarjetas */
+.card {
+  padding: 2rem;
+  border-radius: 1rem;
+  background: var(--surface-card);
+  box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.05));
+}
+
+/* Titulares */
+.card h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Inputs y labels */
+.field {
+  margin-bottom: 1.5rem;
+}
+
+.field label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: var(--text-color);
+}
+
+/* Diálogos */
+.p-dialog .p-dialog-header {
+  font-size: 1.25rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--surface-border);
+  padding: 1.25rem 1.5rem;
+}
+
+.p-dialog .p-dialog-content {
+  padding: 1.5rem;
+}
+
+.p-dialog .p-dialog-footer {
+  border-top: 1px solid var(--surface-border);
+  padding: 1rem 1.5rem;
+}
+
+/* Botones */
+.p-button {
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+}
+
+.p-button.p-button-text {
+  color: var(--primary-color);
+}
+
+/* Tabla */
+.p-table {
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.p-table thead tr th {
+  font-weight: 600;
+  background: var(--surface-ground);
+}
+
+/* Etiquetas */
+.p-tag {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+}

@@ -46,11 +46,7 @@ export class TenantsComponent implements OnInit {
 
   // Datos para el formulario
   tenant: Partial<Tenant> = {};
-  subscriptionPlans: SubscriptionPlan[] = [
-    { id: 1, name: 'free', description: 'Plan gratuito', price: 0, duration_month: 0, is_active: true, max_employees: 5, features: [], created_at: '', updated_at: '' },
-    { id: 2, name: 'basic', description: 'Plan básico', price: 9.99, duration_month: 1, is_active: true, max_employees: 10, features: [], created_at: '', updated_at: '' },
-    { id: 3, name: 'premium', description: 'Plan premium', price: 19.99, duration_month: 1, is_active: true, max_employees: 25, features: [], created_at: '', updated_at: '' }
-  ];
+  subscriptionPlans: SubscriptionPlan[] = [];
 
   constructor(
     private tenantsService: TenantsService,
@@ -61,6 +57,18 @@ export class TenantsComponent implements OnInit {
 
   ngOnInit() {
     this.loadTenants();
+    this.loadSubscriptionPlans();
+  }
+
+  loadSubscriptionPlans() {
+    this.http.get<SubscriptionPlan[]>(`${environment.apiUrl}/subscriptions/plans/`).subscribe({
+      next: (plans) => {
+        this.subscriptionPlans = plans;
+      },
+      error: (error) => {
+        console.error('Error loading subscription plans:', error);
+      }
+    });
   }
 
   loadTenants() {

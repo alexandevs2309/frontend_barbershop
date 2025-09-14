@@ -89,29 +89,33 @@ export class AuthService {
   }
 
   /**
-   * Guardar tokens dependiendo si se eligió "Remember Me"
+   * Guardar tokens de forma segura (solo datos no sensibles en localStorage)
    */
 setTokens(tokens: { access: string; refresh: string }, remember: boolean, user?: any) {
-  // Siempre guardar en localStorage
-  localStorage.setItem('access_token', tokens.access);
-  localStorage.setItem('refresh_token', tokens.refresh);
+  // Solo guardar datos no sensibles del usuario en localStorage
   if (user) {
-    localStorage.setItem('user', JSON.stringify(user));
+    const safeUserData = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      full_name: user.full_name,
+      roles: user.roles // IMPORTANTE: incluir roles para el guard
+    };
+    const storage = remember ? localStorage : sessionStorage;
+    storage.setItem('user', JSON.stringify(safeUserData));
   }
-
-  if (remember) {
-    // Además guarda en sessionStorage si se quiere recordar
-    sessionStorage.setItem('access_token', tokens.access);
-    sessionStorage.setItem('refresh_token', tokens.refresh);
-    if (user) {
-      sessionStorage.setItem('user', JSON.stringify(user));
-    }
-  } else {
-    // Borra cualquier sesión previa en sessionStorage
-    sessionStorage.removeItem('access_token');
-    sessionStorage.removeItem('refresh_token');
-    sessionStorage.removeItem('user');
-  }
+  
+  // NOTA: Los tokens deberían manejarse como httpOnly cookies desde el backend
+  // Por ahora mantenemos en sessionStorage como medida temporal
+  const storage = remember ? localStorage : sessionStorage;
+  storage.setItem('access_token', tokens.access);
+  storage.setItem('refresh_token', tokens.refresh);
+  
+  // Limpiar el storage opuesto
+  const oppositeStorage = remember ? sessionStorage : localStorage;
+  oppositeStorage.removeItem('access_token');
+  oppositeStorage.removeItem('refresh_token');
+  oppositeStorage.removeItem('user');
 }
 
 
@@ -151,7 +155,7 @@ getUserRole(): string | null {
     sessionStorage.removeItem('refresh_token');
     sessionStorage.removeItem('user');
 
-    this.router.navigate(['/login']);
+    this.router.navigate(['/auth/login']);
   }
 
   /**

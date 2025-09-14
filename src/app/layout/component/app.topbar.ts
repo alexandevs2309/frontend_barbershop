@@ -81,7 +81,7 @@ import { Router } from '@angular/router';
 
                     </button>
 
-                    <p-overlayPanel #overlay>
+                    <p-overlaypanel #overlay>
                         <div class="p-5">
                             <p class="mb-3 font-medium">Mi cuenta</p>
                             <ul class="list-none m-0 p-0">
@@ -114,7 +114,7 @@ import { Router } from '@angular/router';
                             </li>
 
                             <li>
-                                <button pButton class="w-full text-left p-button-text text-lg my-2" (click)="goToProfile()">
+                                <button pButton class="w-full text-left p-button-text text-lg my-2" (click)="goToSettings()">
                                 <i class="pi pi-cog mr-2"></i>settings
                                 </button>
                             </li>
@@ -125,7 +125,7 @@ import { Router } from '@angular/router';
               </li>
             </ul>
           </div>
-        </p-overlayPanel>
+        </p-overlaypanel>
                 </div>
             </div>
         </div>
@@ -138,6 +138,11 @@ export class AppTopbar {
 
     goToProfile() {
      this.router.navigate(['/profile']);
+        // Logic to navigate to the user profile page
+    }
+
+     goToSettings() {
+     this.router.navigate(['/admin/system-settings']);
         // Logic to navigate to the user profile page
     }
 

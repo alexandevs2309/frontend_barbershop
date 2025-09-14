@@ -92,7 +92,12 @@ export class PlansService {
     return this.http.delete(joinUrl(this.plansUrl, `${id}/`));
   }
 
-  // 8) OPTIONS para choices (dropdown de name)
+  // 8) Desactivar plan
+  deactivatePlan(id: number) {
+    return this.http.post(joinUrl(this.plansUrl, `${id}/deactivate/`), {});
+  }
+
+  // 9) OPTIONS para choices (dropdown de name)
   options() {
     return this.http.options<any>(this.plansUrl);
   }

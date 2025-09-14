@@ -1,0 +1,110 @@
+.tabview-custom {
+  .p-tabview-nav {
+    background: var(--surface-ground);
+    border: 1px solid var(--surface-border);
+    border-radius: 12px 12px 0 0;
+
+    li {
+      .p-tabview-nav-link {
+        border: none;
+        background: transparent;
+        color: var(--text-color-secondary);
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        transition: all 0.2s;
+
+        &:hover {
+          background: var(--surface-hover);
+          color: var(--text-color);
+        }
+
+        &:focus {
+          box-shadow: inset 0 0 0 0.2rem var(--primary-color-text);
+        }
+      }
+
+      &.p-highlight .p-tabview-nav-link {
+        background: var(--primary-color);
+        color: var(--primary-color-text);
+        border-radius: 8px 8px 0 0;
+      }
+    }
+  }
+
+  .card {
+  overflow: visible !important;
+}
+
+  .p-tabview-panels {
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 2rem;
+  }
+}
+
+.field {
+  margin-bottom: 1.5rem;
+
+  label {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+  }
+}
+
+.field-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  label {
+    margin-left: 0.5rem;
+    font-weight: 500;
+    margin-bottom: 0;
+  }
+}
+
+.p-error {
+  font-size: 0.875rem;
+  color: var(--red-500);
+}
+
+.p-progressspinner {
+  .p-progress-spinner-circle {
+    stroke: var(--primary-color);
+  }
+}
+
+.p-fileupload-basic {
+  .p-button {
+    background: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+
+    &:hover {
+      background: var(--primary-color);
+      color: var(--primary-color-text);
+    }
+  }
+}
+
+.text-muted {
+  color: var(--text-color-secondary);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .tabview-custom .p-tabview-panels {
+    padding: 1rem;
+  }
+
+  .field {
+    margin-bottom: 1rem;
+  }
+
+  .formgrid.grid {
+    margin: 0;
+  }
+}

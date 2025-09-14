@@ -1,0 +1,26 @@
+:host {
+  .card {
+    box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 
+                0 1px 1px 0 rgba(0, 0, 0, 0.14), 
+                0 1px 3px 0 rgba(0, 0, 0, 0.12);
+  }
+
+  .field-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .p-error {
+    font-size: 0.875rem;
+  }
+
+  .p-divider {
+    margin: 2rem 0;
+  }
+
+  h6 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+  }
+}

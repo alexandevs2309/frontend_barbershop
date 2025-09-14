@@ -251,11 +251,46 @@ export class PlansComponent {
                         });
                         if (this.lastEvent) this.load(this.lastEvent);
                     },
+                    error: (error) => {
+                        if (error.status === 400 && error.error?.active_subscriptions) {
+                            // Plan tiene suscripciones activas, ofrecer desactivar
+                            this.offerDeactivation(planToDelete, error.error);
+                        } else {
+                            this.messageService.add({
+                                severity: 'error',
+                                summary: 'Error',
+                                detail: error.error?.message || 'No se pudo eliminar el plan.'
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private offerDeactivation(plan: Plan, errorData: any): void {
+        this.confirmationService.confirm({
+            message: `${errorData.message}\n\n¿Deseas desactivar el plan en su lugar?`,
+            header: 'Plan con Suscripciones Activas',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Desactivar',
+            rejectLabel: 'Cancelar',
+            accept: () => {
+                if (!plan?.id) return;
+                this.plansService.deactivatePlan(plan.id).subscribe({
+                    next: (response: any) => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Plan Desactivado',
+                            detail: response.message || `Plan "${plan.name}" desactivado correctamente.`
+                        });
+                        if (this.lastEvent) this.load(this.lastEvent);
+                    },
                     error: () => {
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Error',
-                            detail: 'No se pudo eliminar el plan.'
+                            detail: 'No se pudo desactivar el plan.'
                         });
                     }
                 });

@@ -1,0 +1,255 @@
+:host ::ng-deep {
+  .role-badge {
+    border-radius: 2px;
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+    
+    &.role-global {
+      background: #C8E6C9;
+      color: #256029;
+    }
+    
+    &.role-tenant {
+      background: #FEEDAF;
+      color: #8A5340;
+    }
+    
+    &.role-module {
+      background: #B3E5FC;
+      color: #23547B;
+    }
+  }
+
+  .p-datatable {
+    .p-datatable-header {
+      padding: 1rem;
+      text-align: left;
+      font-size: 1.5rem;
+    }
+
+    .p-datatable-thead > tr > th {
+      text-align: left;
+      padding: 1rem;
+      border: 1px solid #e9ecef;
+      border-width: 0 0 1px 0;
+      font-weight: 600;
+      color: #495057;
+      background: #f8f9fa;
+    }
+
+    .p-datatable-tbody > tr > td {
+      text-align: left;
+      border: 1px solid #e9ecef;
+      border-width: 0 0 1px 0;
+      padding: 1rem;
+    }
+
+    .p-datatable-tbody > tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+
+    .p-datatable-tbody > tr:hover {
+      background: #e9ecef;
+    }
+  }
+
+  .p-toolbar {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 1rem;
+    border-radius: 6px;
+  }
+
+  .p-dialog {
+    .p-dialog-header {
+      background: #f8f9fa;
+      color: #495057;
+      padding: 1.5rem;
+      border-bottom: 0 none;
+      border-top-right-radius: 6px;
+      border-top-left-radius: 6px;
+    }
+
+    .p-dialog-content {
+      background: #ffffff;
+      color: #495057;
+      padding: 0 1.5rem 2rem 1.5rem;
+      border-bottom-left-radius: 6px;
+      border-bottom-right-radius: 6px;
+    }
+
+    .p-dialog-footer {
+      background: #ffffff;
+      color: #495057;
+      padding: 0 1.5rem 1.5rem 1.5rem;
+      border-top: 1px solid #dee2e6;
+      border-bottom-right-radius: 6px;
+      border-bottom-left-radius: 6px;
+    }
+  }
+
+  .field {
+    margin-bottom: 1rem;
+  }
+
+  .field > label {
+    display: inline-block;
+    margin-bottom: .5rem;
+    color: #495057;
+    font-weight: 600;
+  }
+
+  .field-checkbox {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    
+    label {
+      margin-left: 0.5rem;
+      margin-bottom: 0;
+      font-weight: normal;
+    }
+  }
+
+  .p-button {
+    margin: 0 .5rem 0 0;
+    min-width: auto;
+    
+    &.p-button-success {
+      background: #28a745;
+      border: 1px solid #28a745;
+      
+      &:hover {
+        background: #218838;
+        border-color: #1e7e34;
+      }
+    }
+    
+    &.p-button-warning {
+      background: #ffc107;
+      border: 1px solid #ffc107;
+      color: #212529;
+      
+      &:hover {
+        background: #e0a800;
+        border-color: #d39e00;
+      }
+    }
+  }
+
+  .card {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    border: 0 none;
+    box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+  }
+
+  .p-input-icon-left > i {
+    left: 0.75rem;
+    color: #6c757d;
+  }
+
+  .p-input-icon-left > .p-inputtext {
+    padding-left: 2.5rem;
+  }
+
+  .p-inputtext {
+    font-size: 1rem;
+    color: #495057;
+    background: #ffffff;
+    padding: 0.75rem 0.75rem;
+    border: 1px solid #ced4da;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    border-radius: 6px;
+    
+    &:enabled:focus {
+      outline: 0 none;
+      outline-offset: 0;
+      box-shadow: 0 0 0 0.2rem #a7cbf4;
+      border-color: #3B82F6;
+    }
+  }
+
+  .p-dropdown {
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    border-radius: 6px;
+    
+    &:not(.p-disabled):hover {
+      border-color: #3B82F6;
+    }
+    
+    &:not(.p-disabled).p-focus {
+      outline: 0 none;
+      outline-offset: 0;
+      box-shadow: 0 0 0 0.2rem #a7cbf4;
+      border-color: #3B82F6;
+    }
+  }
+
+  .p-checkbox {
+    .p-checkbox-box {
+      border: 2px solid #ced4da;
+      background: #ffffff;
+      width: 20px;
+      height: 20px;
+      color: #495057;
+      border-radius: 6px;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+      
+      &.p-highlight {
+        border-color: #3B82F6 !important;
+        background: #3B82F6 !important;
+        color: #ffffff !important;
+        
+        .p-checkbox-icon {
+          color: #ffffff !important;
+          font-size: 14px;
+        }
+      }
+      
+      &:not(.p-disabled):hover {
+        border-color: #3B82F6;
+      }
+      
+      &.p-focus {
+        outline: 0 none;
+        outline-offset: 0;
+        box-shadow: 0 0 0 0.2rem #a7cbf4;
+        border-color: #3B82F6;
+      }
+      
+      .p-checkbox-icon {
+        font-size: 12px;
+        color: #ffffff;
+      }
+    }
+  }
+  
+  // Asegurar que los checkboxes seleccionados se vean correctamente
+  .field-checkbox {
+    .p-checkbox-checked .p-checkbox-box {
+      background-color: #3B82F6 !important;
+      border-color: #3B82F6 !important;
+      
+      &::before {
+        content: '\2713';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+      }
+    }
+  }
+}

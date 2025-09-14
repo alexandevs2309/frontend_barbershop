@@ -1,0 +1,224 @@
+<div class="grid">
+    <div class="col-12">
+        <div class="card">
+
+            <p-toast></p-toast>
+            <p-confirmDialog></p-confirmDialog>
+
+            <div class="col-12">
+                <div class="card">
+                    <p-toast></p-toast>
+                    <p-confirmDialog></p-confirmDialog>
+
+                    <p-toolbar styleClass="mb-4 gap-2">
+                        <ng-template pTemplate="left">
+                            <div class="my-2">
+                                <h5 class="m-0">Configuración del Negocio</h5>
+                            </div>
+                        </ng-template>
+
+                        <ng-template pTemplate="right">
+                            <p-button icon="pi pi-download" label="Exportar" [outlined]="true" severity="secondary"
+                                size="small" (onClick)="exportSettings()" [disabled]="!selectedBranch"></p-button>
+                            <p-fileUpload mode="basic" name="config" accept=".json" [maxFileSize]="1000000"
+                                (onSelect)="onFileUpload($event)" chooseLabel="Importar"
+                                styleClass="p-button-outlined p-button-secondary ml-2"></p-fileUpload>
+                        </ng-template>
+                    </p-toolbar>
+
+                    <!-- Loading -->
+                    <div *ngIf="loading" class="flex flex-column align-items-center justify-content-center py-8">
+                        <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8"></p-progressSpinner>
+                        <p class="text-600 mt-3">Cargando configuración...</p>
+                    </div>
+
+                    <!-- Formulario -->
+                    <form [formGroup]="settingForm" *ngIf="!loading">
+                        <p-tabView styleClass="tabview-custom">
+
+                            <!-- Información General -->
+                            <p-tabPanel>
+                                <ng-template pTemplate="header">
+                                    <i class="pi pi-building mr-2"></i>
+                                    <span>Información General</span>
+                                </ng-template>
+
+                                <div class="formgrid grid">
+                                    <div class="field col-12 md:col-6">
+                                        <label for="branch" class="block text-900 font-medium mb-2">Sucursal *</label>
+                                        <p-dropdown id="branch" [options]="branches || []" formControlName="branch"
+                                            optionLabel="name" optionValue="id" placeholder="Seleccionar sucursal"
+                                            (onChange)="onBranchChange($event)" [showClear]="false" class="w-full"
+                                            *ngIf="branches && branches.length >= 0"></p-dropdown>
+                                        <small class="p-error block mt-1" *ngIf="getFieldError('branch')">{{
+                                            getFieldError('branch') }}</small>
+                                    </div>
+
+                                    <div class="field col-12 md:col-6">
+                                        <label for="business_name" class="block text-900 font-medium mb-2">Nombre del
+                                            Negocio *</label>
+                                        <input pInputText id="business_name" formControlName="business_name"
+                                            placeholder="Nombre de la peluquería" class="w-full" />
+                                        <small class="p-error block mt-1" *ngIf="getFieldError('business_name')">{{
+                                            getFieldError('business_name') }}</small>
+                                    </div>
+
+                                    <div class="field col-12 md:col-6">
+                                        <label for="business_email" class="block text-900 font-medium mb-2">Email de
+                                            Contacto</label>
+                                        <input pInputText id="business_email" formControlName="business_email"
+                                            placeholder="contacto@peluqueria.com" class="w-full" />
+                                        <small class="p-error block mt-1" *ngIf="getFieldError('business_email')">{{
+                                            getFieldError('business_email') }}</small>
+                                    </div>
+
+                                    <div class="field col-12 md:col-6">
+                                        <label for="phone_number"
+                                            class="block text-900 font-medium mb-2">Teléfono</label>
+                                        <input pInputText id="phone_number" formControlName="phone_number"
+                                            placeholder="(809) 123-4567" class="w-full" />
+                                    </div>
+
+                                    <div class="field col-12">
+                                        <label for="address" class="block text-900 font-medium mb-2">Dirección</label>
+                                        <textarea pInputTextarea id="address" formControlName="address" rows="3"
+                                            placeholder="Dirección completa del negocio" class="w-full"
+                                            [autoResize]="true"></textarea>
+                                    </div>
+                                </div>
+                            </p-tabPanel>
+
+                            <!-- Configuración Financiera -->
+                            <p-tabPanel>
+                                <ng-template pTemplate="header">
+                                    <i class="pi pi-dollar mr-2"></i>
+                                    <span>Configuración Financiera</span>
+                                </ng-template>
+
+                                <div class="formgrid grid">
+                                    <div class="field col-12 md:col-6">
+                                        <label for="currency" class="block text-900 font-medium mb-2">Moneda *</label>
+                                        <p-dropdown id="currency" [options]="currencyOptions || []"
+                                            formControlName="currency" optionLabel="label" optionValue="value"
+                                            placeholder="Seleccionar moneda" [showClear]="false" class="w-full"
+                                            *ngIf="currencyOptions && currencyOptions.length > 0"></p-dropdown>
+                                    </div>
+
+                                    <div class="field col-12 md:col-6">
+                                        <label for="tax_percentage" class="block text-900 font-medium mb-2">Porcentaje
+                                            de Impuestos (%)</label>
+                                        <p-inputNumber id="tax_percentage" formControlName="tax_percentage" [min]="0"
+                                            [max]="100" suffix="%" class="w-full"></p-inputNumber>
+                                        <small class="p-error block mt-1" *ngIf="getFieldError('tax_percentage')">{{
+                                            getFieldError('tax_percentage') }}</small>
+                                    </div>
+                                </div>
+                            </p-tabPanel>
+
+                            <!-- Horarios de Atención -->
+                            <p-tabPanel>
+                                <ng-template pTemplate="header">
+                                    <i class="pi pi-clock mr-2"></i>
+                                    <span>Horarios de Atención</span>
+                                </ng-template>
+
+                                <!-- Horario General -->
+                                <div class="field mb-3">
+                                    <label for="general_hours" class="block text-900 font-medium mb-2">Horario General</label>
+                                    <div class="flex gap-2">
+                                        <input pInputText id="general_hours" formControlName="general_business_hours"
+                                            placeholder="Ej: 9:00-18:00" class="w-full" />
+                                        <button pButton type="button" label="Aplicar a todos" (click)="applyGeneralHoursToAllDays()"></button>
+                                    </div>
+                                    <p-message severity="info"
+                                            text="Escriba un horario y pulse 'Aplicar a todos' para copiarlo a los días laborables"></p-message>
+                                </div>
+
+                                <!-- Horarios por día -->
+                                <div class="formgrid grid" formGroupName="business_hours">
+                                    <div class="field col-12 md:col-6" *ngFor="let day of daysOfWeek">
+                                        <label [for]="day.key" class="block text-900 font-medium mb-2">{{ day.label }}</label>
+                                        <input pInputText [id]="day.key" [formControlName]="day.key"
+                                            placeholder="9:00-18:00 o Cerrado" class="w-full" />
+                                    </div>
+                                </div>
+
+                                <p-message severity="info"
+                                        text="Formato: HH:MM-HH:MM (ejemplo: 9:00-18:00) o 'Cerrado'"></p-message>
+                            </p-tabPanel>
+
+                            <!-- Configuración del Sistema -->
+                            <p-tabPanel>
+                                <ng-template pTemplate="header">
+                                    <i class="pi pi-cog mr-2"></i>
+                                    <span>Sistema</span>
+                                </ng-template>
+
+                                <div class="formgrid grid">
+                                    <div class="field col-12 md:col-6">
+                                        <label for="timezone" class="block text-900 font-medium mb-2">Zona Horaria
+                                            *</label>
+                                        <p-dropdown id="timezone" [options]="timezoneOptions || []"
+                                            formControlName="timezone" optionLabel="label" optionValue="value"
+                                            placeholder="Seleccionar zona horaria" [showClear]="false" class="w-full"
+                                            *ngIf="timezoneOptions && timezoneOptions.length > 0"></p-dropdown>
+                                    </div>
+
+                                    <div class="field col-12 md:col-6">
+                                        <label for="theme" class="block text-900 font-medium mb-2">Tema Visual *</label>
+                                        <p-dropdown id="theme" [options]="themeOptions || []" formControlName="theme"
+                                            optionLabel="label" optionValue="value" placeholder="Seleccionar tema"
+                                            [showClear]="false" class="w-full"
+                                            *ngIf="themeOptions && themeOptions.length > 0"></p-dropdown>
+                                    </div>
+                                </div>
+
+                                <!-- Preferencias Section -->
+                                <div class="mt-5">
+                                    <h5 class="text-900 font-semibold mb-3">
+                                        <i class="pi pi-sliders-h mr-2"></i>
+                                        Preferencias del Sistema
+                                    </h5>
+
+                                    <div class="formgrid grid" formGroupName="preferences">
+                                        <div class="field-checkbox col-12 md:col-4">
+                                            <p-checkbox formControlName="notifications_enabled" [binary]="true"
+                                                inputId="notifications"></p-checkbox>
+                                            <label for="notifications" class="ml-2 text-900">Notificaciones
+                                                Habilitadas</label>
+                                        </div>
+
+                                        <div class="field-checkbox col-12 md:col-4">
+                                            <p-checkbox formControlName="auto_backup" [binary]="true"
+                                                inputId="backup"></p-checkbox>
+                                            <label for="backup" class="ml-2 text-900">Respaldo Automático</label>
+                                        </div>
+
+                                        <div class="field-checkbox col-12 md:col-4">
+                                            <p-checkbox formControlName="maintenance_mode" [binary]="true"
+                                                inputId="maintenance"></p-checkbox>
+                                            <label for="maintenance" class="ml-2 text-900">Modo Mantenimiento</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </p-tabPanel>
+                        </p-tabView>
+
+                        <!-- Action Buttons -->
+                        <div
+                            class="flex justify-content-between align-items-center mt-6 pt-4 border-top-1 surface-border">
+                            <div class="flex gap-2">
+                                <p-button label="Limpiar" icon="pi pi-refresh" severity="secondary" [outlined]="true"
+                                    (onClick)="clearForm()" [disabled]="saving"></p-button>
+                                <p-button label="Restablecer" icon="pi pi-undo" severity="secondary" [outlined]="true"
+                                    (onClick)="resetForm()" [disabled]="saving"></p-button>
+                            </div>
+
+                            <p-button [label]="saving ? 'Guardando...' : 'Guardar Configuración'"
+                                [icon]="saving ? 'pi pi-spin pi-spinner' : 'pi pi-save'" (onClick)="saveSetting()"
+                                [disabled]="saving" [loading]="saving" size="large"></p-button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>

@@ -1,9 +1,12 @@
 // app.routes.ts
 import { Routes } from '@angular/router';
 import { AppLayout } from './app/layout/component/app.layout';
-import { AuthGuard } from './app/core/guard/auth.guard';
+import { AuthGuard, AuthGuardChild } from './app/core/guard/auth.guard';
 
 export const appRoutes: Routes = [
+  // Root redirect
+  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
+
   // 🔓 Públicas
   { path: 'auth/login', loadComponent: () => import('./app/pages/auth/login').then(m => m.Login) },
   { path: 'forgot-password', loadComponent: () => import('./app/pages/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent) },
@@ -19,7 +22,26 @@ export const appRoutes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
       // Dashboard para clientes (suscritos)
-      { path: 'dashboard', loadComponent: () => import('./app/pages/dashboard/dashboard').then(m => m.Dashboard) },
+      { path: 'dashboard', loadComponent: () => import('./app/pages/client/clients/dashboard/dashboard').then(m => m.Dashboard) },
+
+      // Client routes
+      {
+        path: 'client',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuardChild],
+        data: { allowedRoles: ['Client-Admin', 'Admin', 'Manager', 'Client-Staff'] },
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'home' },
+          { path: 'home', loadComponent: () => import('./app/pages/client/clients/dashboard/dashboard').then(m => m.Dashboard) },
+          { path: 'clients', loadComponent: () => import('./app/pages/client/clients/clients.component').then(m => m.ClientsComponent) },
+          { path: 'employees', loadComponent: () => import('./app/pages/client/employees/employees.component').then(m => m.EmployeesComponent) },
+          { path: 'services', loadComponent: () => import('./app/pages/client/services/services.component').then(m => m.ServicesComponent) },
+          { path: 'appointments', loadComponent: () => import('./app/pages/client/appointments/appointments.component').then(m => m.AppointmentsComponent) },
+          { path: 'pos', loadComponent: () => import('./app/pages/client/pos/pos.component').then(m => m.PosComponent) },
+          { path: 'reports', loadComponent: () => import('./app/pages/client/reports/reports.component').then(m => m.ReportsComponent) },
+          { path: 'settings', loadComponent: () => import('./app/pages/client/settings/settings.component').then(m => m.SettingsComponent) }
+        ]
+      },
 
       // Admin del SaaS (solo Super-Admin)
       {

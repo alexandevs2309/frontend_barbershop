@@ -67,10 +67,8 @@ import { MessageService } from 'primeng/api';
     `
 })
 export class Login {
-    email: string = '';
-
-    password: string = '';
-
+    email: string = 'juan@admin.com';
+    password: string = 'admin123';
     checked: boolean = false;
 
     constructor(
@@ -81,70 +79,68 @@ export class Login {
     ) {}
 
     login() {
-    this.auth.login({ email: this.email, password: this.password }).subscribe({
-        next: (res) => {
-            if (res.access && res.refresh && res.user) {
-                this.auth.setTokens(
-                    { access: res.access, refresh: res.refresh },
-                    this.checked,
-                    res.user
-                );
+        this.auth.login({ email: this.email, password: this.password }).subscribe({
+            next: (res) => {
+                if (res.access && res.refresh && res.user) {
+                    // Primero establecer el usuario completo
+                    this.auth.setCurrentUser(res.user);
 
-                 const roles = res.user.roles;
+                    // Luego guardar tokens y datos seguros
+                    this.auth.setTokens(
+                        { access: res.access, refresh: res.refresh },
+                        this.checked,
+                        res.user
+                    );
+
+                    const roles = res.user.roles;
                     const role = roles && roles.length > 0 ? roles[0].name : null;
 
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Inicio de sesión',
-                    detail: 'Redirigiendo...'
-                });
+                    // Limpiar y refrescar entitlements
+                    this.entitlementsService.clear();
+                    this.entitlementsService.refresh().subscribe();
 
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Inicio de sesión',
+                        detail: 'Redirigiendo...'
+                    });
 
+                    // Navegar según el rol
                     if (role === 'Super-Admin') {
-                    this.router.navigate(['admin/dashboard']);
-                    } else if (role === 'Admin') {
-                    this.router.navigate(['/dashboard']);
-                    } else if (role === 'ClientStaff') {
-                    this.router.navigate(['/staff/home']); // si lo implementas
+                        this.router.navigate(['/admin/dashboard']);
+                    } else if (role === 'Soporte') {
+                        this.router.navigate(['/dashboard']);
+                    } else if (['Client-Admin', 'Admin', 'Manager', 'Client-Staff'].includes(role)) {
+                        this.router.navigate(['/dashboard']);
                     } else {
-                    this.router.navigate(['/access']); // o una página de acceso denegado
+                        this.router.navigate(['/dashboard']);
                     }
 
-            } else if (res.detail?.includes('MFA')) {
+                } else if (res.detail?.includes('MFA')) {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error de MFA',
+                        detail: 'Por favor, completa la autenticación de múltiples factores.',
+                        life: 5000
+                    });
+                } else {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Respuesta inesperada',
+                        detail: 'No se recibieron tokens válidos.',
+                        life: 5000
+                    });
+                }
+            },
+            error: (err) => {
+                console.error('Error login:', err);
                 this.messageService.add({
                     severity: 'error',
-                    summary: 'Error de MFA',
-                    detail: 'Por favor, completa la autenticación de múltiples factores.',
-                    life: 5000
-                });
-            } else {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Respuesta inesperada',
-                    detail: 'No se recibieron tokens válidos.',
+                    summary: 'Error de inicio de sesión',
+                    detail: 'Correo o contraseña incorrectos',
                     life: 5000
                 });
             }
-            this.auth.setCurrentUser(res.user);
-             // 🔑 resuelves el “tengo que recargar” aquí:
-          // 1) limpia el estado previo
-          this.entitlementsService.clear();
-          // 2) refresca con el nuevo token guardado
-          this.entitlementsService.refresh().subscribe(); // no hace falta manejar valor aquí
-
-
-        },
-        error: (err) => {
-            console.error('Error login:', err);
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Error de inicio de sesión',
-                detail: 'Correo o contraseña incorrectos',
-                life: 5000
-            });
-        }
-    });
+        });
+    }
 }
-
-}
-

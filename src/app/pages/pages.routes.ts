@@ -2,8 +2,12 @@ import { Routes } from '@angular/router';
 import { Documentation } from './documentation/documentation';
 import { Crud } from './crud/crud';
 import { Empty } from './empty/empty';
+import { clientRoutes } from './client/client.routes';
+import { dashboardRoutes } from './dashboard/dashboard.routes';
 
 export default [
+    { path: 'client', children: clientRoutes },
+    { path: 'dashboard', children: dashboardRoutes },
     { path: 'documentation', component: Documentation },
     { path: 'crud', component: Crud },
     { path: 'empty', component: Empty },

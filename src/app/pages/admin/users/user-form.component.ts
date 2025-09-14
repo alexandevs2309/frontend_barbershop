@@ -78,10 +78,12 @@ export class UserFormComponent implements OnInit, OnChanges {
         this.roleService.getRoles().subscribe({
             next: (data: Role[]) => {
                 console.log('[DEBUG] Respuesta roles:', data);
-                this.roles = data.map((role) => ({
-                    label: role.name,
-                    value: role.id
-                }));
+                this.roles = data
+                    .filter((role) => role.id !== undefined)
+                    .map((role) => ({
+                        label: role.name,
+                        value: role.id!
+                    }));
             },
             error: (err) => console.error('[ERROR] Cargando roles:', err)
         });

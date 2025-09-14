@@ -1,54 +1,58 @@
-<!-- Tarjetas KPI -->
-<div class="grid grid-cols-12 gap-8">
-       <app-widget-admin class="contents " />
+<!-- Tarjetas KPI con datos reales -->
+ <div class="grid grid-cols-12 gap-8">
+            <app-widget-admin class="contents" />
+            <div class="col-span-12 xl:col-span-6">
 
-      <div class="col-span-12 xl:col-span-6">
+            </div>
+            <div class="col-span-12 xl:col-span-6">
 
-  </div>
+            </div>
+        </div>
 
-</div>
+
 
 
 <!-- Gráficos -->
-<div class="grid">
-  <div class="col-12 xl-col-span-6 md:col-span-4 my-5">
-    <!-- Suscripciones por mes -->
-        <p-card header="Suscripciones por mes">
-        <p-chart type="line" [data]="lineChartData" [options]="chartOptions" styleClass="w-full" height="300px"></p-chart>
+<div class="card grid">
+    <div class="grid col-12 ">
+        <p-card header="Suscripciones por mes" *ngIf="lineChartData.labels.length">
+            <div class="mb-2 text-sm text-gray-500">API Response: {{ dataSource }}</div>
+            <p-chart type="line" [data]="lineChartData" [options]="chartOptions" styleClass="w-full" height="300px"></p-chart>
         </p-card>
-  </div>
-
-  <div class="col-12 xl-col-span-6 md:col-span-4 my-5 sm:col-span-2">
-            <p-card header="Distribución de planes">
-        <p-chart type="pie" [data]="pieChartData" [options]="chartOptions" styleClass="w-full" height="300px"></p-chart>
-        </p-card>
-  </div>
+    </div>
 </div>
-
+<div class="card grid" >
+    <div class="col-12">
+        <p-card header="Distribución de planes" *ngIf="pieChartData.datasets[0].data.length">
+            <div class="mb-2 text-sm text-gray-500">API Data: B:{{ pieChartData.datasets[0].data[0] }} P:{{ pieChartData.datasets[0].data[1] }} Pr:{{ pieChartData.datasets[0].data[2] }}</div>
+            <p-chart type="pie" [data]="pieChartData" [options]="chartOptions" styleClass="w-full" height="300px"></p-chart>
+        </p-card>
+    </div>
+</div>
 <!-- Actividad reciente -->
-<div class="mt-4">
-  <p-card header="Actividad reciente">
-    <p-table [value]="activities" [scrollable]="true" scrollHeight="250px">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Evento</th>
-          <th>Usuario</th>
-          <th>Fecha</th>
-          <th>Tipo</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-act>
-        <tr>
-          <td><i class="{{ act.icon }} mr-2"></i>{{ act.event }}</td>
-          <td>{{ act.user }}</td>
-          <td>{{ act.date | date: 'short' }}</td>
-          <td>
-            <p-badge [value]="act.type" [severity]="act.severity"></p-badge>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
+<div class="grid">
+    <div class="col-12">
+        <p-card header="Actividad reciente">
+            <p-table [value]="activities" [scrollable]="true" scrollHeight="250px">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Evento</th>
+                        <th>Usuario</th>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-act>
+                    <tr>
+                        <td><i class="{{ act.icon }} mr-2"></i>{{ act.event }}</td>
+                        <td>{{ act.user }}</td>
+                        <td>{{ act.date | date: 'short' }}</td>
+                        <td>
+                            <p-badge [value]="act.type" [severity]="act.severity"></p-badge>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-card>
+    </div>
 </div>
-
-
