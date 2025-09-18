@@ -1,0 +1,62 @@
+:host {
+  .card {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .employee-table {
+    .p-datatable-tbody > tr > td {
+      padding: 0.75rem;
+      vertical-align: middle;
+    }
+  }
+
+  .employee-actions {
+    .p-button {
+      margin-right: 0.25rem;
+    }
+  }
+
+  .employee-dialog {
+    .p-dialog-content {
+      padding: 1.5rem;
+    }
+    
+    .field {
+      margin-bottom: 1rem;
+    }
+    
+    label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+  }
+
+  .user-info-dialog {
+    .user-table {
+      margin-top: 1rem;
+    }
+    
+    .info-note {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 4px;
+    }
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    .card {
+      padding: 1rem;
+    }
+    
+    .employee-actions {
+      .p-button {
+        margin-bottom: 0.25rem;
+      }
+    }
+  }
+}

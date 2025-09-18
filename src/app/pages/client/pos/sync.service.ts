@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, interval } from 'rxjs';
+import { sanitizeForLog } from '../../../shared/utils/error.util';
 
 @Injectable({
   providedIn: 'root'
@@ -43,10 +44,11 @@ export class SyncService {
   // Handle sync events from other terminals
   private handleSyncEvent(event: StorageEvent): void {
     if (event.newValue) {
-      const syncData = JSON.parse(event.newValue);
-      
-      // Ignore own events
-      if (syncData.terminalId === this.terminalId) return;
+      try {
+        const syncData = JSON.parse(event.newValue);
+        
+        // Ignore own events
+        if (syncData.terminalId === this.terminalId) return;
       
       // Process sync event
       switch (syncData.type) {
@@ -60,22 +62,25 @@ export class SyncService {
           this.handleSaleProcessed(syncData.data);
           break;
       }
+      } catch (error) {
+        console.error('Failed to parse sync event:', error);
+      }
     }
   }
   
   private handleStockUpdate(data: any): void {
     // Update local stock data
-    console.log('Stock updated from another terminal:', data);
+    console.log(`[${this.terminalId}] Stock updated from terminal ${data.terminalId}:`, sanitizeForLog(data));
   }
   
   private handleCashRegisterUpdate(data: any): void {
     // Update cash register status
-    console.log('Cash register updated from another terminal:', data);
+    console.log(`[${this.terminalId}] Cash register updated from terminal ${data.terminalId}:`, sanitizeForLog(data));
   }
   
   private handleSaleProcessed(data: any): void {
     // Update sales data
-    console.log('Sale processed on another terminal:', data);
+    console.log(`[${this.terminalId}] Sale processed on terminal ${data.terminalId}:`, sanitizeForLog(data));
   }
   
   private syncData(): void {
@@ -105,6 +110,8 @@ export class SyncService {
     return this.terminalId;
   }
   
+
+
   getLastSync(): Date {
     return new Date(this.lastSync);
   }

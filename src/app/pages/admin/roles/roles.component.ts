@@ -12,8 +12,10 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { DropdownModule } from 'primeng/dropdown';
 import { CheckboxModule } from 'primeng/checkbox';
+import { CardModule } from 'primeng/card';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { AccordionModule } from 'primeng/accordion';
+import { sanitizeForLog } from '../../../shared/utils/error.util';
 
 @Component({
   selector: 'app-role',
@@ -32,6 +34,7 @@ import { AccordionModule } from 'primeng/accordion';
     DropdownModule,
     CheckboxModule,
     ConfirmDialogModule,
+    CardModule,
     AccordionModule
   ],
   templateUrl: './roles.component.html',
@@ -99,27 +102,56 @@ export class RoleComponent implements OnInit {
   }
 
   loadRoles() {
+    console.log('🔄 Cargando roles...');
     this.loadingStates.roles = true;
     this.roleService.getRoles().subscribe({
       next: data => {
+        console.log('✅ Roles cargados:', data.length, 'roles');
         this.roles = data;
         this.loadingStates.roles = false;
       },
-      error: () => this.loadingStates.roles = false
+      error: (error) => {
+        console.error('❌ Error cargando roles:', sanitizeForLog(error));
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error', 
+          detail: 'No se pudieron cargar los roles. Verifica la conexión.' 
+        });
+        this.loadingStates.roles = false;
+      }
     });
   }
 
   loadPermissions() {
+    console.log('🔄 Cargando permisos...');
     this.loadingStates.permissions = true;
     this.roleService.getPermissions().subscribe({
       next: data => {
-        this.permissions = data;
-        this.groupedPermissions = this.getGroupedPermissions(data);
+        console.log('✅ Respuesta completa:', data);
+        console.log('✅ Tipo de data:', typeof data, Array.isArray(data));
+        console.log('✅ Permisos cargados:', data?.length || 0, 'permisos');
+        
+        if (data && data.length > 0) {
+          console.log('✅ Primer permiso:', data[0]);
+          this.permissions = data;
+          this.groupedPermissions = this.getGroupedPermissions(data);
+          console.log('✅ Grupos creados:', Object.keys(this.groupedPermissions));
+        } else {
+          console.log('⚠️ No hay permisos en la respuesta');
+          this.permissions = [];
+          this.groupedPermissions = {};
+        }
+        
         this.loadingStates.permissions = false;
         this.cdr.detectChanges();
       },
       error: error => {
-        console.error('Error cargando permisos:', error);
+        console.error('❌ Error cargando permisos:', error);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error', 
+          detail: 'No se pudieron cargar los permisos. Verifica la conexión.' 
+        });
         this.loadingStates.permissions = false;
         this.permissions = [];
         this.groupedPermissions = {};
@@ -185,7 +217,7 @@ export class RoleComponent implements OnInit {
         this.loadingStates.saving = false;
       },
       error: (error) => {
-        console.error('Error saving role:', error);
+        console.error('Error saving role:', sanitizeForLog(error));
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar el rol' });
         this.loadingStates.saving = false;
       }
@@ -307,7 +339,31 @@ export class RoleComponent implements OnInit {
       'Can add product': 'Puede agregar producto',
       'Can change product': 'Puede modificar producto',
       'Can delete product': 'Puede eliminar producto',
-      'Can view product': 'Puede ver producto'
+      'Can view product': 'Puede ver producto',
+      
+      // POS - Sales
+      'Can add sale': 'Puede crear ventas',
+      'Can change sale': 'Puede modificar ventas',
+      'Can delete sale': 'Puede eliminar ventas',
+      'Can view sale': 'Puede ver ventas',
+      
+      // POS - Sale Details
+      'Can add sale detail': 'Puede agregar detalles de venta',
+      'Can change sale detail': 'Puede modificar detalles de venta',
+      'Can delete sale detail': 'Puede eliminar detalles de venta',
+      'Can view sale detail': 'Puede ver detalles de venta',
+      
+      // POS - Payments
+      'Can add payment': 'Puede registrar pagos',
+      'Can change payment': 'Puede modificar pagos',
+      'Can delete payment': 'Puede eliminar pagos',
+      'Can view payment': 'Puede ver pagos',
+      
+      // POS - Cash Register
+      'Can add cash register': 'Puede abrir caja registradora',
+      'Can change cash register': 'Puede modificar caja registradora',
+      'Can delete cash register': 'Puede eliminar caja registradora',
+      'Can view cash register': 'Puede ver caja registradora'
     };
     
     return translations[name] || name;
@@ -354,11 +410,11 @@ export class RoleComponent implements OnInit {
       'employees_api': 'Empleados',
       'services_api': 'Servicios',
       'inventory_api': 'Inventario',
-      'billing_api': 'Facturación',
-      'pos_api': 'Punto de Venta',
+      'billing_api': 'Facturación SaaS',
+      'pos_api': 'Punto de Venta (POS)',
       'reports_api': 'Reportes',
       'audit_api': 'Auditoría',
-      'roles_api': 'Roles',
+      'roles_api': 'Roles y Permisos',
       'tenants_api': 'Inquilinos',
       'subscriptions_api': 'Suscripciones'
     };

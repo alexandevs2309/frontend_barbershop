@@ -11,8 +11,9 @@ export class UsersService {
 
   constructor(private http: HttpClient) {}
 
-  getUsers(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/`);
+  getUsers(params?: any): Observable<any> {
+    const options = params ? { params } : {};
+    return this.http.get<any>(`${this.apiUrl}/`, options);
   }
 
   updateUser(id: number, userData: any): Observable<any> {
@@ -25,5 +26,33 @@ export class UsersService {
 
   getUsersWithoutTenant(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/?tenant__isnull=true`);
+  }
+
+  deleteUser(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}/`);
+  }
+
+  getDeletedUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/deleted/`);
+  }
+
+  restoreUser(id: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${id}/restore/`, {});
+  }
+
+  createUser(userData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/`, userData);
+  }
+
+  changePassword(userId: number, newPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${userId}/change_password/`, { password: newPassword });
+  }
+
+  getUserLogs(userId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${userId}/logs/`);
+  }
+
+  exportUsers(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/export/`, { responseType: 'blob' });
   }
 }

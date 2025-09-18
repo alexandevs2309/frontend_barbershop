@@ -29,7 +29,7 @@ export const appRoutes: Routes = [
         path: 'client',
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuardChild],
-        data: { allowedRoles: ['Client-Admin', 'Admin', 'Manager', 'Client-Staff'] },
+        data: { allowedRoles: ['Client-Admin', 'Admin', 'Manager', 'Client-Staff', 'Cajera'] },
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'home' },
           { path: 'home', loadComponent: () => import('./app/pages/client/clients/dashboard/dashboard').then(m => m.Dashboard) },

@@ -49,11 +49,28 @@ function normalizeRolesFromToken(token: string, jwt: JwtHelperService): string[]
 
 function isAuthenticated(router: Router, jwt: JwtHelperService): GuardResult {
     const token = getToken();
-    if (!token || jwt.isTokenExpired(token, CLOCK_SKEW_SECONDS)) {
-        // Guardar returnUrl para volver post-login
+    const user = getStoredUser();
+    
+    // Verificar que exista token y usuario
+    if (!token || !user) {
+        console.log('AuthGuard: No token or user found');
         const returnUrl = location.pathname + location.search;
         return router.createUrlTree([LOGIN_URL], { queryParams: { returnUrl } });
     }
+    
+    // Verificar que el token no haya expirado
+    if (jwt.isTokenExpired(token, CLOCK_SKEW_SECONDS)) {
+        console.log('AuthGuard: Token expired');
+        // Limpiar datos expirados
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+        sessionStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(USER_KEY);
+        
+        const returnUrl = location.pathname + location.search;
+        return router.createUrlTree([LOGIN_URL], { queryParams: { returnUrl } });
+    }
+    
     return true;
 }
 

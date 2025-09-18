@@ -374,29 +374,52 @@ applyGeneralHoursToAllDays() {
 
     onFileUpload(event: any) {
         const file = event.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e: any) => {
-                try {
-                    const config = JSON.parse(e.target.result);
-                    this.confirmationService.confirm({
-                        message: '¿Está seguro de importar esta configuración? Se sobrescribirá la configuración actual.',
-                        header: 'Confirmar Importación',
-                        icon: 'pi pi-exclamation-triangle',
-                        accept: () => {
-                            this.importSettings(config);
-                        }
-                    });
-                } catch (error) {
-                    this.messageService.add({
-                        severity: 'error',
-                        summary: 'Error',
-                        detail: 'Archivo de configuración inválido'
-                    });
-                }
-            };
-            reader.readAsText(file);
+        if (!file) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No se seleccionó ningún archivo'
+            });
+            return;
         }
+
+        if (file.size > 1024 * 1024) { // 1MB limit
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'El archivo es demasiado grande (máximo 1MB)'
+            });
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+            try {
+                const config = JSON.parse(e.target.result);
+                this.confirmationService.confirm({
+                    message: '¿Está seguro de importar esta configuración? Se sobrescribirá la configuración actual.',
+                    header: 'Confirmar Importación',
+                    icon: 'pi pi-exclamation-triangle',
+                    accept: () => {
+                        this.importSettings(config);
+                    }
+                });
+            } catch (error) {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Archivo de configuración inválido'
+                });
+            }
+        };
+        reader.onerror = () => {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Error al leer el archivo'
+            });
+        };
+        reader.readAsText(file);
     }
 
     importSettings(config: any) {

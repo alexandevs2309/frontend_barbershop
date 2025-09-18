@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, catchError } from 'rxjs';
+import { Observable, map, catchError, of } from 'rxjs';
 import { environment } from '../../../../environment';
+import { BUSINESS_CONSTANTS } from '../../../shared/constants/business.constants';
 
 export interface Service {
   id?: number;
@@ -11,8 +12,28 @@ export interface Service {
   duration: number; // en minutos
   category?: string;
   is_active: boolean;
+  commission_percentage?: number;
   created_at?: string;
   updated_at?: string;
+}
+
+
+/**
+ * Represents the assignment of an employee to a service with custom pricing and commission settings
+ */
+export interface ServiceEmployee {
+  /** Unique identifier for the service-employee assignment */
+  id?: number;
+  /** ID of the service being assigned */
+  service: number;
+  /** ID of the employee being assigned */
+  employee: number;
+  /** Display name of the employee (populated from employee data) */
+  employee_name?: string;
+  /** Custom price override for this employee-service combination */
+  custom_price?: number;
+  /** Custom commission percentage override for this assignment */
+  commission_percentage?: number;
 }
 
 @Injectable({
@@ -24,17 +45,14 @@ export class ServicesService {
   constructor(private http: HttpClient) {}
 
   getServices(params?: any): Observable<any> {
-    console.log('Services URL:', `${this.apiUrl}/`);
     return this.http.get<any>(`${this.apiUrl}/`, { params }).pipe(
       map(response => {
-        console.log('Services response:', response);
         if (Array.isArray(response)) {
           return { results: response, count: response.length };
         }
         return response;
       }),
       catchError(error => {
-        console.error('Services error:', error);
         throw error;
       })
     );
@@ -57,17 +75,60 @@ export class ServicesService {
   }
 
   getCategories(): Observable<string[]> {
-    // Categorías predefinidas, podrías obtenerlas del backend
-    return new Observable(observer => {
-      observer.next([
-        'Corte de Cabello',
-        'Barba y Bigote',
-        'Coloración',
-        'Tratamientos',
-        'Peinados',
-        'Otros'
-      ]);
-      observer.complete();
-    });
+    return this.http.get<string[]>(`${environment.apiUrl}/services/categories/`).pipe(
+      map(response => response || []),
+      catchError(() => of(BUSINESS_CONSTANTS.DEFAULT_CATEGORIES))
+    );
+  }
+
+  // Obtener precios dinámicos por empleado
+  getServicePrices(serviceId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${serviceId}/prices/`).pipe(
+      catchError(error => {
+        console.error('Error getting service prices:', error);
+        return of([]);
+      })
+    );
+  }
+
+  // Establecer precio específico por empleado
+  setEmployeePrice(serviceId: number, employeeId: number, price: number): Observable<any> {
+    if (!serviceId || !employeeId || price < 0) {
+      return of({ error: 'Invalid parameters' });
+    }
+
+    const payload = {
+      employee_id: employeeId,
+      price: price
+    };
+
+    return this.http.post(`${this.apiUrl}/${serviceId}/set-employee-price/`, payload).pipe(
+      catchError(error => {
+        console.error('Error setting employee price:', error);
+        return of({ error: 'Failed to set employee price' });
+      })
+    );
+  }
+
+  // Asignar empleados a servicio
+  assignEmployees(serviceId: number, employeeIds: number[]): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${serviceId}/assign-employees/`, {
+      employee_ids: employeeIds
+    }).pipe(
+      catchError(error => {
+        console.error('Error assigning employees:', error);
+        throw error;
+      })
+    );
+  }
+
+  // Obtener empleados asignados a servicio
+  getServiceEmployees(serviceId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${serviceId}/employees/`).pipe(
+      catchError(error => {
+        console.error('Error getting service employees:', error);
+        return of([]);
+      })
+    );
   }
 }

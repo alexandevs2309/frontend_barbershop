@@ -11,9 +11,11 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TagModule } from 'primeng/tag';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { ServicesService, Service } from './services.service';
+import { ServicesService, Service, ServiceEmployee } from './services.service';
+import { EmployeesService } from '../employees/employees.service';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { BUSINESS_CONSTANTS } from '../../../shared/constants/business.constants';
 
 
 @Component({
@@ -89,6 +91,10 @@ import { debounceTime } from 'rxjs/operators';
                           pTooltip="Ver" styleClass="p-button-rounded p-button-text"></p-button>
                 <p-button icon="pi pi-pencil" (click)="editService(service)"
                           pTooltip="Editar" styleClass="p-button-rounded p-button-text"></p-button>
+                <p-button icon="pi pi-users" (click)="manageEmployees(service)"
+                          pTooltip="Empleados" styleClass="p-button-rounded p-button-info p-button-text"></p-button>
+                <p-button icon="pi pi-dollar" (click)="managePricing(service)"
+                          pTooltip="Precios" styleClass="p-button-rounded p-button-warning p-button-text"></p-button>
                 <p-button icon="pi pi-trash" (click)="confirmDelete(service)"
                           pTooltip="Eliminar" styleClass="p-button-rounded p-button-danger p-button-text"></p-button>
               </div>
@@ -134,11 +140,18 @@ import { debounceTime } from 'rxjs/operators';
                          placeholder="30" class="w-full" required></p-inputNumber>
         </div>
 
-        <div class="field col-12">
-          <label for="price">Precio *</label>
+        <div class="field col-12 md:col-6">
+          <label for="price">Precio Base *</label>
           <p-inputNumber [(ngModel)]="service.price" mode="currency"
                          currency="USD" [min]="0" placeholder="0.00"
                          class="w-full" required></p-inputNumber>
+        </div>
+
+        <div class="field col-12 md:col-6">
+          <label for="commission">Comisión % *</label>
+          <p-inputNumber [(ngModel)]="service.commission_percentage"
+                         [min]="0" [max]="100" suffix="%"
+                         placeholder="15" class="w-full" required></p-inputNumber>
         </div>
 
         <div class="field col-12">
@@ -194,6 +207,84 @@ import { debounceTime } from 'rxjs/operators';
       </ng-template>
     </p-dialog>
 
+    <!-- Dialog Gestionar Empleados -->
+    <p-dialog [(visible)]="employeesDialog" [modal]="true" [style]="{width: '600px'}"
+              header="Gestionar Empleados" [closable]="true">
+      <div *ngIf="selectedService">
+        <h4>{{ selectedService.name }}</h4>
+        <p class="text-muted mb-4">Selecciona los empleados que pueden realizar este servicio</p>
+
+        <div class="employee-list">
+          <div class="employee-item flex align-items-center justify-content-between p-3 border-round mb-2"
+               *ngFor="let employee of allEmployees"
+               [class.bg-primary-50]="isEmployeeAssigned(employee.id)">
+            <div class="flex align-items-center gap-3">
+              <input type="checkbox"
+                     [checked]="isEmployeeAssigned(employee.id)"
+                     (change)="toggleEmployeeAssignment(employee.id, $event)">
+              <div>
+                <div class="font-semibold">{{ employee.user || employee.name }}</div>
+                <div class="text-sm text-600">{{ employee.specialty || 'Sin especialidad' }}</div>
+              </div>
+            </div>
+            <div *ngIf="isEmployeeAssigned(employee.id)" class="text-sm text-primary">
+              <i class="pi pi-check"></i> Asignado
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <div class="flex justify-content-end gap-2">
+          <p-button label="Cancelar" (click)="employeesDialog = false" styleClass="p-button-text"></p-button>
+          <p-button label="Guardar" (click)="saveEmployeeAssignments()" [loading]="savingEmployees"></p-button>
+        </div>
+      </ng-template>
+    </p-dialog>
+
+    <!-- Dialog Gestionar Precios -->
+    <p-dialog [(visible)]="pricingDialog" [modal]="true" [style]="{width: '700px'}"
+              header="Gestionar Precios por Empleado" [closable]="true">
+      <div *ngIf="selectedService">
+        <h4>{{ selectedService.name }}</h4>
+        <p class="text-muted mb-4">Precio base: {{ selectedService.price | currency:'USD' }}</p>
+
+        <div class="pricing-list">
+          <div class="pricing-item p-3 border-round mb-3 surface-card"
+               *ngFor="let assignment of serviceEmployees">
+            <div class="flex align-items-center justify-content-between">
+              <div class="flex align-items-center gap-3">
+                <div>
+                  <div class="font-semibold">{{ assignment.employee_name }}</div>
+                  <div class="text-sm text-600">Comisión: {{ assignment.commission_percentage || selectedService.commission_percentage || getDefaultCommission() }}%</div>
+                </div>
+              </div>
+              <div class="flex align-items-center gap-2">
+                <p-inputNumber [(ngModel)]="assignment.custom_price"
+                              mode="currency" currency="USD" [min]="0"
+                              placeholder="Precio personalizado"
+                              styleClass="w-8rem"></p-inputNumber>
+                <small class="text-muted">*Opcional</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!serviceEmployees.length" class="text-center p-4">
+          <i class="pi pi-users text-4xl text-300 mb-2 block"></i>
+          <p class="text-600">No hay empleados asignados a este servicio</p>
+          <p-button label="Asignar Empleados" (click)="pricingDialog = false; manageEmployees(selectedService)"></p-button>
+        </div>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <div class="flex justify-content-end gap-2">
+          <p-button label="Cancelar" (click)="pricingDialog = false" styleClass="p-button-text"></p-button>
+          <p-button label="Guardar Precios" (click)="savePricing()" [loading]="savingPrices"></p-button>
+        </div>
+      </ng-template>
+    </p-dialog>
+
     <p-toast></p-toast>
     <p-confirmDialog></p-confirmDialog>
   `
@@ -204,11 +295,20 @@ export class ServicesComponent implements OnInit {
   selectedService: Service | null = null;
   categories: string[] = [];
 
+  // Employee management
+  allEmployees: any[] = [];
+  serviceEmployees: ServiceEmployee[] = [];
+  assignedEmployeeIds: number[] = [];
+
   serviceDialog = false;
   viewDialog = false;
+  employeesDialog = false;
+  pricingDialog = false;
   isEdit = false;
   loading = false;
   saving = false;
+  savingEmployees = false;
+  savingPrices = false;
 
   totalRecords = 0;
   searchTerm = '';
@@ -224,19 +324,42 @@ export class ServicesComponent implements OnInit {
 
   constructor(
     private servicesService: ServicesService,
+    private employeesService: EmployeesService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
   ) {}
 
+  getDefaultCommission(): number {
+    return BUSINESS_CONSTANTS.DEFAULT_COMMISSION_PERCENTAGE;
+  }
+
   ngOnInit() {
     this.loadServices();
     this.loadCategories();
+    this.loadEmployees();
 
     this.searchSubject.pipe(
         debounceTime(500)
     ).subscribe((term) => {
         this.searchTerm = term;
         this.loadServices();
+    });
+  }
+
+  loadEmployees() {
+    this.employeesService.getEmployees().subscribe({
+      next: (employees: any) => {
+        this.allEmployees = Array.isArray(employees) ? employees : (employees?.results || []);
+      },
+      error: (error) => {
+        console.error('Error loading employees:', (error));
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al cargar empleados'
+        });
+        this.allEmployees = [];
+      }
     });
   }
 
@@ -264,11 +387,12 @@ export class ServicesComponent implements OnInit {
 
     this.servicesService.getServices(params).subscribe({
       next: (response) => {
-        this.services = response.results;
-        this.totalRecords = response.count;
+        this.services = response.results || response;
+        this.totalRecords = response.count || (response.results || response).length;
         this.loading = false;
       },
       error: (error) => {
+        console.error('Error loading services:', (error));
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -283,7 +407,8 @@ export class ServicesComponent implements OnInit {
     this.service = {
       name: '',
       price: 0,
-      duration: 30,
+      duration: BUSINESS_CONSTANTS.DEFAULT_SERVICE_DURATION,
+      commission_percentage: BUSINESS_CONSTANTS.DEFAULT_COMMISSION_PERCENTAGE,
       is_active: true
     };
     this.isEdit = false;
@@ -379,6 +504,119 @@ export class ServicesComponent implements OnInit {
           detail: 'Error al eliminar servicio'
         });
       }
+    });
+  }
+
+  manageEmployees(service: Service) {
+    if (!service.id) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Servicio inválido'
+      });
+      return;
+    }
+    this.selectedService = service;
+    this.loadServiceEmployees(service.id);
+    this.employeesDialog = true;
+  }
+
+  managePricing(service: Service) {
+    if (!service.id) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Servicio inválido'
+      });
+      return;
+    }
+    this.selectedService = service;
+    this.loadServiceEmployees(service.id);
+    this.pricingDialog = true;
+  }
+
+  loadServiceEmployees(serviceId: number) {
+    this.servicesService.getServiceEmployees(serviceId).subscribe({
+      next: (employees) => {
+        this.serviceEmployees = employees;
+        this.assignedEmployeeIds = employees.map(emp => (emp.employee));
+      },
+      error: () => {
+        this.serviceEmployees = [];
+        this.assignedEmployeeIds = [];
+      }
+    });
+  }
+
+  isEmployeeAssigned(employeeId: number): boolean {
+    return this.assignedEmployeeIds.includes(employeeId);
+  }
+
+  toggleEmployeeAssignment(employeeId: number, event: any) {
+    const convertedId = (employeeId);
+    if (event.target.checked) {
+      if (!this.assignedEmployeeIds.includes(convertedId)) {
+        this.assignedEmployeeIds.push(convertedId);
+      }
+    } else {
+      this.assignedEmployeeIds = this.assignedEmployeeIds.filter(id => id !== convertedId);
+    }
+  }
+
+  saveEmployeeAssignments() {
+    if (!this.selectedService?.id) return;
+
+    this.savingEmployees = true;
+    this.servicesService.assignEmployees(this.selectedService.id, this.assignedEmployeeIds).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: 'Empleados asignados correctamente'
+        });
+        this.employeesDialog = false;
+        this.savingEmployees = false;
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error?.error?.detail || 'Error al asignar empleados'
+        });
+        this.savingEmployees = false;
+      }
+    });
+  }
+
+  savePricing() {
+    if (!this.selectedService?.id) return;
+
+    this.savingPrices = true;
+    const promises = this.serviceEmployees
+      .filter(emp => emp.custom_price && emp.custom_price > 0)
+      .map(emp =>
+        this.servicesService.setEmployeePrice(
+          this.selectedService!.id!,
+          emp.employee,
+          emp.custom_price!
+        ).toPromise()
+      );
+
+    Promise.all(promises).then(() => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: 'Precios actualizados correctamente'
+      });
+      this.pricingDialog = false;
+      this.savingPrices = false;
+    }).catch((error) => {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error?.error?.detail || 'Error al actualizar precios'
+      });
+      this.savingPrices = false;
     });
   }
 }

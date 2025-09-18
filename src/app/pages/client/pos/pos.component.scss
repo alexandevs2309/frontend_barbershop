@@ -245,3 +245,61 @@
   50% { transform: scale(1.05); box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
   100% { transform: scale(1); box-shadow: none; }
 }
+
+/* Performance optimizations - remove inline styles */
+.loading-card {
+  max-width: 400px;
+}
+
+.cash-register-dialog {
+  .p-dialog-content {
+    padding: 1.5rem;
+  }
+}
+
+/* Improved dialog styling */
+.p-dialog .p-dialog-header {
+  background-color: var(--surface-card);
+  color: var(--text-color);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.p-dialog .p-dialog-content {
+  background-color: var(--surface-card);
+  color: var(--text-color);
+}
+
+/* Better button spacing in toolbar */
+.toolbar-buttons {
+  .p-button {
+    margin-right: 0.5rem;
+    
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+/* Improved table styling */
+.p-table .p-table-tbody > tr {
+  background-color: var(--surface-card);
+  color: var(--text-color);
+  
+  &:hover {
+    background-color: var(--surface-hover);
+  }
+}
+
+/* Better form styling */
+.p-inputnumber input,
+.p-dropdown,
+.p-inputtext {
+  background-color: var(--surface-card);
+  color: var(--text-color);
+  border-color: var(--surface-border);
+  
+  &:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem var(--primary-color-alpha);
+  }
+}

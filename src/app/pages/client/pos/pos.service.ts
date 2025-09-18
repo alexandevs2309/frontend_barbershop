@@ -3,6 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map, catchError } from 'rxjs';
 import { environment } from '../../../../environment';
 
+/**
+ * Payment method information with validation constraints
+ */
+export interface Payment {
+  method: string;
+  /** Payment amount - must be positive */
+  amount: number;
+}
+
 export interface Sale {
   id?: number;
   client?: number;
@@ -14,6 +23,8 @@ export interface Sale {
   payment_method: string;
   closed: boolean;
   details: SaleDetail[];
+  /** Multiple payment methods used for this sale */
+  payments?: Payment[];
 }
 
 export interface SaleDetail {
@@ -23,6 +34,10 @@ export interface SaleDetail {
   price: number;
   item_type: 'service' | 'product';
   object_id: number;
+  /** Employee ID for service provider commissions and earnings tracking */
+  employee_id?: number;
+  /** Employee name for service provider display in reports */
+  employee_name?: string;
 }
 
 @Injectable({
@@ -73,5 +88,43 @@ export class PosService {
 
   getActivePromotions(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/promotions/active/`);
+  }
+
+  openCashRegister(initialCash: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/sales/open_register/`, { 
+      initial_cash: initialCash 
+    });
+  }
+
+  getCurrentCashRegister(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/sales/current_register/`);
+  }
+
+  closeCashRegister(registerId: number, finalCash: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/cashregisters/${registerId}/close/`, { 
+      final_cash: finalCash 
+    });
+  }
+
+  // Endpoints para el sistema de ganancias por empleado
+  getMyEarnings(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/earnings/my_earnings/`);
+  }
+
+  getCurrentFortnightEarnings(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/earnings/current_fortnight/`);
+  }
+
+  getMyFortnightSummary(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/employees/fortnight-summaries/my_summary/`);
+  }
+
+  // Nuevos endpoints para configuración
+  getPosCategories(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/categories/`);
+  }
+
+  getPosConfig(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/config/`);
   }
 }

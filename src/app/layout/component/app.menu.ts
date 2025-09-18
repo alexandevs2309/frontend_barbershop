@@ -21,6 +21,35 @@ export class AppMenu implements OnInit, OnDestroy {
     model: MenuItem[] = [];
     private userSubscription?: Subscription;
 
+    private readonly PRINCIPAL_ITEMS: MenuItem[] = [
+        { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/client/home'] },
+        { label: 'Clientes', icon: 'pi pi-fw pi-users', routerLink: ['/client/clients'] }
+    ];
+
+    private readonly GESTION_ITEMS: MenuItem[] = [
+        { label: 'Servicios', icon: 'pi pi-fw pi-list', routerLink: ['/client/services'] },
+        { label: 'Empleados', icon: 'pi pi-fw pi-user-plus', routerLink: ['/client/employees'] },
+        { label: 'Ganancias', icon: 'pi pi-fw pi-money-bill', routerLink: ['/client/earnings'] },
+        { label: 'Inventario', icon: 'pi pi-fw pi-box', routerLink: ['/client/inventory'] },
+        { label: 'Citas', icon: 'pi pi-fw pi-calendar', routerLink: ['/client/appointments'] },
+        { label: 'POS/Caja', icon: 'pi pi-fw pi-shopping-cart', routerLink: ['/client/pos'] },
+        { label: 'Reportes', icon: 'pi pi-fw pi-chart-bar', routerLink: ['/client/reports'] }
+    ];
+
+    private readonly CONFIG_ITEMS: MenuItem[] = [
+        { label: 'Mi Negocio', icon: 'pi pi-fw pi-building', routerLink: ['/client/settings'] }
+    ];
+
+    private readonly STAFF_ITEMS: MenuItem[] = [
+        { label: 'Mis Citas', icon: 'pi pi-fw pi-calendar', routerLink: ['/client/my-appointments'] },
+        { label: 'Mis Ganancias', icon: 'pi pi-fw pi-money-bill', routerLink: ['/client/my-earnings'] }
+    ];
+
+    private readonly CASHIER_ITEMS: MenuItem[] = [
+        { label: 'POS/Caja', icon: 'pi pi-fw pi-shopping-cart', routerLink: ['/client/pos'] },
+        { label: 'Historial Ventas', icon: 'pi pi-fw pi-history', routerLink: ['/client/sales-history'] }
+    ];
+
     constructor(private authService: AuthService) {}
 
     ngOnInit() {
@@ -40,12 +69,12 @@ export class AppMenu implements OnInit, OnDestroy {
         }
 
         const userRole = user.roles?.[0]?.name;
-        
+
         if (userRole === 'Super-Admin') {
             this.model = this.getSuperAdminMenu();
         } else if (userRole === 'Soporte') {
             this.model = this.getSoporteMenu();
-        } else if (['Client-Admin', 'Admin', 'Manager', 'Client-Staff'].includes(userRole)) {
+        } else if (['Client-Admin', 'Admin', 'Manager', 'Client-Staff', 'Cajera'].includes(userRole)) {
             this.model = this.getTenantMenu(userRole);
         } else {
             this.model = [];
@@ -107,6 +136,8 @@ export class AppMenu implements OnInit, OnDestroy {
                 items: [
                     { label: 'Servicios', icon: 'pi pi-fw pi-list', routerLink: ['/client/services'] },
                     { label: 'Empleados', icon: 'pi pi-fw pi-user-plus', routerLink: ['/client/employees'] },
+                    { label: 'Ganancias', icon: 'pi pi-fw pi-money-bill', routerLink: ['/client/earnings'] },
+                    { label: 'Inventario', icon: 'pi pi-fw pi-box', routerLink: ['/client/inventory'] },
                     { label: 'Citas', icon: 'pi pi-fw pi-calendar', routerLink: ['/client/appointments'] },
                     { label: 'POS/Caja', icon: 'pi pi-fw pi-shopping-cart', routerLink: ['/client/pos'] },
                     { label: 'Reportes', icon: 'pi pi-fw pi-chart-bar', routerLink: ['/client/reports'] }
@@ -124,6 +155,8 @@ export class AppMenu implements OnInit, OnDestroy {
                 items: [
                     { label: 'Servicios', icon: 'pi pi-fw pi-list', routerLink: ['/client/services'] },
                     { label: 'Empleados', icon: 'pi pi-fw pi-user-plus', routerLink: ['/client/employees'] },
+                    { label: 'Ganancias', icon: 'pi pi-fw pi-money-bill', routerLink: ['/client/earnings'] },
+                    { label: 'Inventario', icon: 'pi pi-fw pi-box', routerLink: ['/client/inventory'] },
                     { label: 'Citas', icon: 'pi pi-fw pi-calendar', routerLink: ['/client/appointments'] },
                     { label: 'POS/Caja', icon: 'pi pi-fw pi-shopping-cart', routerLink: ['/client/pos'] },
                     { label: 'Reportes', icon: 'pi pi-fw pi-chart-bar', routerLink: ['/client/reports'] }
@@ -135,6 +168,14 @@ export class AppMenu implements OnInit, OnDestroy {
                 items: [
                     { label: 'Mis Citas', icon: 'pi pi-fw pi-calendar', routerLink: ['/client/my-appointments'] },
                     { label: 'Mis Ganancias', icon: 'pi pi-fw pi-money-bill', routerLink: ['/client/my-earnings'] }
+                ]
+            });
+        } else if (role === 'Cajera') {
+            baseMenu.push({
+                label: 'Punto de Venta',
+                items: [
+                    { label: 'POS/Caja', icon: 'pi pi-fw pi-shopping-cart', routerLink: ['/client/pos'] },
+                    { label: 'Historial Ventas', icon: 'pi pi-fw pi-history', routerLink: ['/client/sales-history'] }
                 ]
             });
         }

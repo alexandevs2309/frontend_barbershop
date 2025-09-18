@@ -10,6 +10,7 @@ interface CartItem {
   item_type: 'service' | 'product';
   object_id: number;
   stock?: number;
+  employee_id?: number;
 }
 
 @Injectable({

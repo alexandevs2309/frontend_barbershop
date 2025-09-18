@@ -1,0 +1,156 @@
+:host {
+  .grid {
+    margin: 0;
+  }
+
+  .stats-cards {
+    .p-card {
+      height: 100%;
+      
+      .p-card-body {
+        padding: 1.5rem;
+      }
+    }
+  }
+
+  .chart-container {
+    .p-card {
+      height: 100%;
+      
+      .p-card-content {
+        padding: 0;
+      }
+    }
+  }
+
+  .dashboard-chart {
+    height: 300px;
+    
+    canvas {
+      max-height: 300px;
+    }
+  }
+
+  .employee-table {
+    .p-datatable-tbody > tr > td {
+      padding: 0.75rem;
+      vertical-align: middle;
+    }
+  }
+
+  .inventory-summary {
+    .summary-item {
+      text-align: center;
+      padding: 1rem;
+      border-radius: 8px;
+      
+      .summary-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+      
+      .summary-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+      }
+      
+      .summary-label {
+        font-size: 0.875rem;
+        opacity: 0.8;
+      }
+    }
+  }
+
+  .quick-actions {
+    .p-button {
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .date-filters {
+    .p-calendar {
+      margin-right: 0.5rem;
+    }
+  }
+
+  .export-buttons {
+    .p-button {
+      margin-left: 0.5rem;
+    }
+  }
+
+  // Chart specific styles
+  .sales-chart {
+    .p-chart {
+      height: 300px;
+    }
+  }
+
+  .services-chart {
+    .p-chart {
+      height: 300px;
+    }
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    .stats-cards {
+      .col-md-3 {
+        margin-bottom: 1rem;
+      }
+    }
+    
+    .chart-container {
+      margin-bottom: 1rem;
+    }
+    
+    .date-filters {
+      flex-direction: column;
+      gap: 0.5rem;
+      
+      .p-calendar {
+        width: 100%;
+        margin-right: 0;
+      }
+    }
+    
+    .export-buttons {
+      flex-direction: column;
+      gap: 0.5rem;
+      
+      .p-button {
+        width: 100%;
+        margin-left: 0;
+      }
+    }
+    
+    .quick-actions {
+      .p-button {
+        width: 100%;
+        margin-right: 0;
+      }
+    }
+  }
+
+  // Loading states
+  .loading-overlay {
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+  }
+}

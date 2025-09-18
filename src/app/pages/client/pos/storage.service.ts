@@ -57,8 +57,14 @@ export class StorageService {
   }
   
   getOfflineQueue(): any[] {
-    const stored = localStorage.getItem('pos_offline_queue');
-    return stored ? JSON.parse(stored) : [];
+    try {
+      const stored = localStorage.getItem('pos_offline_queue');
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Error accessing offline queue:', error);
+      localStorage.removeItem('pos_offline_queue');
+      return [];
+    }
   }
   
   clearOfflineQueue(): void {

@@ -104,6 +104,12 @@ import { DatePicker } from 'primeng/datepicker';
                 </div>
 
                 <div class="field col-12">
+                    <label for="status">Estado</label>
+                    <p-select [options]="statusOptions" [(ngModel)]="appointment.status" optionLabel="label" optionValue="value" placeholder="Seleccionar estado" class="w-full" *ngIf="isEdit"></p-select>
+                    <p-tag value="Programada" severity="info" *ngIf="!isEdit"></p-tag>
+                </div>
+
+                <div class="field col-12">
                     <label for="description">Notas</label>
                     <textarea pInputTextarea [(ngModel)]="appointment.description" rows="3" placeholder="Notas adicionales..." class="w-full"></textarea>
                 </div>
@@ -239,7 +245,13 @@ export class AppointmentsComponent implements OnInit {
 
 
     openNew() {
-        this.appointment = { status: 'scheduled' };
+        this.appointment = {
+            status: 'scheduled',
+            client: undefined,
+            service: undefined,
+            stylist: undefined,
+            description: ''
+        };
         this.appointmentDate = null;
         this.appointmentTime = '';
         this.isEdit = false;
@@ -259,115 +271,109 @@ export class AppointmentsComponent implements OnInit {
         this.appointment = {};
     }
 
-   saveAppointment() {
-    console.log('Appointment data:', this.appointment);
-    console.log('Stylist value:', this.appointment.stylist);
+    saveAppointment() {
+        if (!this.validateAppointment()) return;
 
-    // 🔹 Validaciones específicas
-    if (!this.appointment.client) {
-        this.showWarn('Debe seleccionar un cliente');
-        return;
-    }
-    if (!this.appointment.service) {
-        this.showWarn('Debe seleccionar un servicio');
-        return;
-    }
-    if (!this.appointment.stylist) {
-        this.showWarn('Debe seleccionar un estilista');
-        return;
-    }
-    if (!(this.appointmentDate instanceof Date) || isNaN(this.appointmentDate.getTime())) {
-        this.showWarn('Debe seleccionar una fecha válida');
-        return;
-    }
-    if (!this.appointmentTime || this.appointmentTime.trim() === '') {
-        this.showWarn('Debe seleccionar una hora');
-        return;
-    }
+        // Combinar fecha y hora
+        const dateTime = new Date(this.appointmentDate!);
+        const [hours, minutes] = this.appointmentTime.split(':');
+        dateTime.setHours(parseInt(hours), parseInt(minutes));
+        this.appointment.date_time = dateTime.toISOString();
 
-    // 🔹 Combinar fecha y hora
-    const dateTime = new Date(this.appointmentDate);
-    const [hours, minutes] = this.appointmentTime.split(':');
-    dateTime.setHours(parseInt(hours), parseInt(minutes));
+        // Validar disponibilidad del estilista
+        if (!this.isEdit && !this.checkStylistAvailability(dateTime)) {
+            this.showWarn('El estilista no está disponible en ese horario');
+            return;
+        }
 
-    // 🔹 Validar que no sea una fecha pasada
-    if (dateTime < new Date()) {
-        this.showWarn('No puede crear una cita en una fecha pasada');
-        return;
-    }
+        // Convertir Employee ID a User ID para backend
+        const selectedStylist = this.stylists.find(s => s.id === this.appointment.stylist);
+        if (selectedStylist?.user_id) {
+            this.appointment.stylist = selectedStylist.user_id;
+        }
 
-    this.appointment.date_time = dateTime.toISOString();
+        this.saving = true;
+        const operation = this.isEdit && this.appointment.id
+            ? this.appointmentsService.updateAppointment(this.appointment.id, this.appointment)
+            : this.appointmentsService.createAppointment(this.appointment);
 
-    // 🔹 Convert stylist Employee ID to User ID
-    const selectedStylist = this.stylists.find(s => s.id === this.appointment.stylist);
-    console.log('Selected stylist:', selectedStylist);
-    console.log('Original stylist ID:', this.appointment.stylist);
-    if (selectedStylist && selectedStylist.user_id) {
-        this.appointment.stylist = selectedStylist.user_id;
-        console.log('Converted to user ID:', this.appointment.stylist);
-    } else {
-        console.log('No user_id found for stylist');
-    }
-
-    // 🔹 Guardar en backend
-    this.saving = true;
-
-    if (this.isEdit && this.appointment.id) {
-        // Editar cita existente
-        this.appointmentsService.updateAppointment(this.appointment.id, this.appointment).subscribe({
+        operation.subscribe({
             next: () => {
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Éxito',
-                    detail: 'Cita actualizada correctamente'
+                    detail: `Cita ${this.isEdit ? 'actualizada' : 'creada'} correctamente`
                 });
                 this.loadAppointments();
-                this.appointmentDialog = false;
+                this.hideDialog();
                 this.saving = false;
             },
-            error: () => {
+            error: (error) => {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'Error al actualizar cita'
-                });
-                this.saving = false;
-            }
-        });
-    } else {
-        // Crear nueva cita (usando endpoint de prueba)
-        console.log('Final appointment data being sent:', this.appointment);
-        this.http.post('http://localhost:8000/api/appointments/test/', this.appointment).subscribe({
-            next: () => {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Éxito',
-                    detail: 'Cita creada correctamente'
-                });
-                this.loadAppointments();
-                this.appointmentDialog = false;
-                this.saving = false;
-            },
-            error: () => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Error al crear cita'
+                    detail: this.getErrorMessage(error)
                 });
                 this.saving = false;
             }
         });
     }
-}
 
-// 🔹 Helper para mensajes de advertencia
-private showWarn(detail: string) {
-    this.messageService.add({
-        severity: 'warn',
-        summary: 'Advertencia',
-        detail
-    });
-}
+    private showWarn(detail: string) {
+        this.messageService.add({
+            severity: 'warn',
+            summary: 'Advertencia',
+            detail
+        });
+    }
+
+    private validateAppointment(): boolean {
+        if (!this.appointment.client) {
+            this.showWarn('Debe seleccionar un cliente');
+            return false;
+        }
+        if (!this.appointment.service) {
+            this.showWarn('Debe seleccionar un servicio');
+            return false;
+        }
+        if (!this.appointment.stylist) {
+            this.showWarn('Debe seleccionar un estilista');
+            return false;
+        }
+        if (!this.appointmentDate || !this.appointmentTime) {
+            this.showWarn('Debe seleccionar fecha y hora');
+            return false;
+        }
+
+        const dateTime = new Date(this.appointmentDate);
+        const [hours, minutes] = this.appointmentTime.split(':');
+        dateTime.setHours(parseInt(hours), parseInt(minutes));
+
+        if (dateTime < new Date()) {
+            this.showWarn('No puede crear una cita en una fecha pasada');
+            return false;
+        }
+
+        return true;
+    }
+
+    private checkStylistAvailability(dateTime: Date): boolean {
+        const conflictingAppointment = this.appointments.find(apt => {
+            const aptDateTime = new Date(apt.date_time);
+            const timeDiff = Math.abs(aptDateTime.getTime() - dateTime.getTime());
+            return apt.stylist === this.appointment.stylist &&
+                   apt.status === 'scheduled' &&
+                   timeDiff < 30 * 60 * 1000;
+        });
+
+        return !conflictingAppointment;
+    }
+
+    private getErrorMessage(error: any): string {
+        if (error?.error?.detail) return error.error.detail;
+        if (error?.error?.message) return error.error.message;
+        return 'Error al procesar la cita';
+    }
 
     completeAppointment(appointment: Appointment) {
         this.appointmentsService.updateAppointment(appointment.id!, { status: 'completed' }).subscribe({

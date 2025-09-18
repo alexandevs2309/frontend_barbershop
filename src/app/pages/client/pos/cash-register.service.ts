@@ -70,7 +70,7 @@ export class CashRegisterService {
   }
 
   calculateTotal(): number {
-    return this.denominations.reduce((sum, d) => sum + d.total, 0);
+    return this.denominations.reduce((sum, d) => sum + (isNaN(d.total) ? 0 : d.total || 0), 0);
   }
 
   updateDenomination(value: number, count: number) {

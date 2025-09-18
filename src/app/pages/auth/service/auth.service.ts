@@ -127,11 +127,97 @@ getUserRole(): string | null {
   return user.role || null;
 }
 
+// Métodos para el sistema de roles de dos niveles
+getUserRoles(): string[] {
+  const userData = localStorage.getItem('user') || sessionStorage.getItem('user');
+  if (!userData) return [];
+
+  try {
+    const user = JSON.parse(userData);
+  
+  // Si roles es un array de objetos con propiedad 'name'
+  if (Array.isArray(user.roles) && user.roles.length > 0 && typeof user.roles[0] === 'object') {
+    return user.roles.map((role: any) => role.name).filter(Boolean);
+  }
+  
+  // Si roles es un array de strings
+  if (Array.isArray(user.roles)) {
+    return user.roles;
+  }
+  
+    return [];
+  } catch (error) {
+    console.error('Failed to parse user data:', error);
+    return [];
+  }
+}
+
+// Nivel 1: Roles globales (SaaS)
+isSuperAdmin(): boolean {
+  return this.getUserRoles().includes('Super-Admin');
+}
+
+isSupportRole(): boolean {
+  return this.getUserRoles().includes('Soporte');
+}
+
+isGlobalRole(): boolean {
+  return this.isSuperAdmin() || this.isSupportRole();
+}
+
+// Nivel 2: Roles por tenant (Peluquería)
+isClientAdmin(): boolean {
+  return this.getUserRoles().includes('Client-Admin');
+}
+
+isCashier(): boolean {
+  return this.getUserRoles().includes('Cajera');
+}
+
+isStylist(): boolean {
+  return this.getUserRoles().includes('Client-Staff'); // Estilista/Peluquero
+}
+
+isUtility(): boolean {
+  return this.getUserRoles().includes('Utility');
+}
+
+// Permisos específicos para POS
+canAccessPOS(): boolean {
+  // Solo roles de tenant pueden acceder al POS
+  return !this.isGlobalRole() && (this.isClientAdmin() || this.isCashier());
+}
+
+canManageCashRegister(): boolean {
+  return this.isClientAdmin() || this.isCashier();
+}
+
+canViewAllEarnings(): boolean {
+  return this.isClientAdmin();
+}
+
+canViewOwnEarnings(): boolean {
+  return this.isStylist();
+}
+
+canViewSalesHistory(): boolean {
+  return this.isClientAdmin() || this.isCashier();
+}
+
+canProcessSales(): boolean {
+  return this.isClientAdmin() || this.isCashier();
+}
+
   /**
    * Obtener el token actual (prioridad a localStorage)
    */
  getToken(): string | null {
   return localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+}
+
+getCurrentUser(): any {
+  const userData = localStorage.getItem('user') || sessionStorage.getItem('user');
+  return userData ? JSON.parse(userData) : null;
 }
 
 

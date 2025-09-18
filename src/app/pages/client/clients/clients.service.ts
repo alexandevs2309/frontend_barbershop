@@ -58,7 +58,9 @@ export class ClientsService {
   }
 
   getClient(id: number): Observable<Client> {
-    return this.http.get<Client>(`${this.apiUrl}/${id}/`);
+    return this.http.get<Client>(`${this.apiUrl}/${id}/`).pipe(
+      catchError(this.handleError.bind(this))
+    );
   }
 
   createClient(client: Partial<Client>): Observable<Client> {
@@ -68,35 +70,49 @@ export class ClientsService {
   }
 
   updateClient(id: number, client: Partial<Client>): Observable<Client> {
-    return this.http.patch<Client>(`${this.apiUrl}/${id}/`, client);
+    return this.http.patch<Client>(`${this.apiUrl}/${id}/`, client).pipe(
+      catchError(this.handleError.bind(this))
+    );
   }
 
   deleteClient(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}/`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}/`).pipe(
+      catchError(this.handleError.bind(this))
+    );
   }
 
   getClientHistory(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}/history/`);
+    return this.http.get(`${this.apiUrl}/${id}/history/`).pipe(
+      catchError(this.handleError.bind(this))
+    );
   }
 
   getClientStats(id: number): Observable<ClientStats> {
-    return this.http.get<ClientStats>(`${this.apiUrl}/${id}/stats/`);
+    return this.http.get<ClientStats>(`${this.apiUrl}/${id}/stats/`).pipe(
+      catchError(this.handleError.bind(this))
+    );
   }
 
   addLoyaltyPoints(id: number, points: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${id}/add_loyalty_points/`, { points });
+    return this.http.post(`${this.apiUrl}/${id}/add_loyalty_points/`, { points }).pipe(
+      catchError(this.handleError.bind(this))
+    );
   }
 
   redeemPoints(id: number, points: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${id}/redeem_points/`, { points });
+    return this.http.post(`${this.apiUrl}/${id}/redeem_points/`, { points }).pipe(
+      catchError(this.handleError.bind(this))
+    );
   }
 
   getBirthdaysThisMonth(): Observable<Client[]> {
-    return this.http.get<Client[]>(`${this.apiUrl}/birthdays_this_month/`);
+    return this.http.get<Client[]>(`${this.apiUrl}/birthdays_this_month/`).pipe(
+      catchError(this.handleError.bind(this))
+    );
   }
 
   private handleError(error: HttpErrorResponse) {
-    if (error.status === 401 || (error.status === 400 && error.error?.includes('tenant'))) {
+    if (error.status === 401 || (error.status === 400 && typeof error.error === 'string' && error.error.includes('tenant'))) {
       // Token expirado/inválido o sin tenant, redirigir al login
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
@@ -106,6 +122,19 @@ export class ClientsService {
       sessionStorage.removeItem('user');
       this.router.navigate(['/auth/login']);
     }
-    return throwError(() => error);
+
+    let errorMsg = 'An unknown error occurred';
+    if (error.error instanceof ErrorEvent) {
+      // Client-side or network error
+      errorMsg = `Client-side error: ${error.error.message}`;
+    } else if (error.error && typeof error.error === 'object' && error.error.detail) {
+      errorMsg = `Server error: ${error.error.detail}`;
+    } else if (typeof error.error === 'string') {
+      errorMsg = `Server error: ${error.error}`;
+    } else if (error.message) {
+      errorMsg = error.message;
+    }
+
+    return throwError(() => new Error(errorMsg));
   }
 }

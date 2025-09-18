@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../../environment';
+import { sanitizeForLog } from '../../../shared/utils/error.util';
 
 export interface Role {
   id?: number;
@@ -31,8 +32,12 @@ export class RoleService {
 
   // Listar roles
   getRoles(): Observable<Role[]> {
+    console.log('🔗 URL de roles:', this.apiUrl);
     return this.http.get<{ results: Role[] }>(this.apiUrl).pipe(
-      map(response => response.results)
+      map(response => {
+        console.log('📝 Respuesta del servidor:', response.results?.length || 0, 'roles');
+        return response.results;
+      })
     );
   }
 
@@ -58,8 +63,13 @@ export class RoleService {
 
   // Obtener todos los permisos disponibles
   getPermissions(): Observable<Permission[]> {
-    return this.http.get<{ results: Permission[] }>(`${environment.apiUrl}/roles/roles/permissions/`).pipe(
-      map(response => response.results || [])
+    const permissionsUrl = `${environment.apiUrl}/roles/roles/permissions/`;
+    console.log('🔗 URL de permisos:', permissionsUrl);
+    return this.http.get<{ results: Permission[] }>(permissionsUrl).pipe(
+      map(response => {
+        console.log('📝 Respuesta de permisos:', response.results?.length || 0, 'permisos');
+        return response.results || [];
+      })
     );
   }
 

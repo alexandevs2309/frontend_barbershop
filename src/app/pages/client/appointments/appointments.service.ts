@@ -22,7 +22,7 @@ export interface Appointment {
   providedIn: 'root'
 })
 export class AppointmentsService {
-  private apiUrl = `${environment.apiUrl}/appointments/appointments`;
+  private apiUrl = `${environment.apiUrl}/appointments`;
 
   constructor(private http: HttpClient) {}
 

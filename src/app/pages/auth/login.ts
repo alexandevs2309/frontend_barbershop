@@ -58,7 +58,12 @@ import { MessageService } from 'primeng/api';
                                 </div>
                                 <a [routerLink]="['/forgot-password']" class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</a>
                             </div>
-                            <p-button label="Sign In" styleClass="w-full" (click)="login()"></p-button>
+                            @if (errorMessage) {
+                                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                                    {{ errorMessage }}
+                                </div>
+                            }
+                            <p-button label="Sign In" styleClass="w-full" [loading]="loading" (click)="login()"></p-button>
                         </div>
                     </div>
                 </div>
@@ -70,6 +75,8 @@ export class Login {
     email: string = 'juan@admin.com';
     password: string = 'admin123';
     checked: boolean = false;
+    errorMessage: string = '';
+    loading: boolean = false;
 
     constructor(
         private auth: AuthService,
@@ -79,67 +86,97 @@ export class Login {
     ) {}
 
     login() {
+        this.errorMessage = '';
+        this.loading = true;
+        
+        // Validar campos antes de enviar
+        if (!this.email || !this.password) {
+            this.errorMessage = 'Por favor ingresa email y contraseña';
+            this.loading = false;
+            return;
+        }
+
         this.auth.login({ email: this.email, password: this.password }).subscribe({
             next: (res) => {
-                if (res.access && res.refresh && res.user) {
-                    // Primero establecer el usuario completo
-                    this.auth.setCurrentUser(res.user);
+                // Verificar que la respuesta tenga los datos necesarios
+                if (!res || !res.access || !res.refresh || !res.user) {
+                    this.errorMessage = 'Respuesta inválida del servidor';
+                    this.loading = false;
+                    return;
+                }
 
-                    // Luego guardar tokens y datos seguros
-                    this.auth.setTokens(
-                        { access: res.access, refresh: res.refresh },
-                        this.checked,
-                        res.user
-                    );
+                // Verificar que el usuario tenga roles
+                if (!res.user.roles || res.user.roles.length === 0) {
+                    this.errorMessage = 'Usuario sin roles asignados';
+                    this.loading = false;
+                    return;
+                }
 
-                    const roles = res.user.roles;
-                    const role = roles && roles.length > 0 ? roles[0].name : null;
+                // Establecer el usuario completo
+                this.auth.setCurrentUser(res.user);
 
-                    // Limpiar y refrescar entitlements
-                    this.entitlementsService.clear();
-                    this.entitlementsService.refresh().subscribe();
+                // Guardar tokens y datos seguros
+                this.auth.setTokens(
+                    { access: res.access, refresh: res.refresh },
+                    this.checked,
+                    res.user
+                );
 
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Inicio de sesión',
-                        detail: 'Redirigiendo...'
-                    });
+                const roles = res.user.roles;
+                const role = roles[0].name;
 
-                    // Navegar según el rol
+                // Limpiar y refrescar entitlements
+                this.entitlementsService.clear();
+                this.entitlementsService.refresh().subscribe();
+
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Inicio de sesión exitoso',
+                    detail: `Bienvenido ${res.user.full_name || res.user.email}`,
+                    life: 3000
+                });
+
+                // Navegar según el rol
+                setTimeout(() => {
                     if (role === 'Super-Admin') {
                         this.router.navigate(['/admin/dashboard']);
                     } else if (role === 'Soporte') {
                         this.router.navigate(['/dashboard']);
-                    } else if (['Client-Admin', 'Admin', 'Manager', 'Client-Staff'].includes(role)) {
+                    } else if (['Client-Admin', 'Admin', 'Manager', 'Client-Staff', 'Cajera'].includes(role)) {
                         this.router.navigate(['/dashboard']);
                     } else {
                         this.router.navigate(['/dashboard']);
                     }
-
-                } else if (res.detail?.includes('MFA')) {
-                    this.messageService.add({
-                        severity: 'error',
-                        summary: 'Error de MFA',
-                        detail: 'Por favor, completa la autenticación de múltiples factores.',
-                        life: 5000
-                    });
-                } else {
-                    this.messageService.add({
-                        severity: 'error',
-                        summary: 'Respuesta inesperada',
-                        detail: 'No se recibieron tokens válidos.',
-                        life: 5000
-                    });
-                }
+                }, 1000);
+                this.loading = false;
             },
             error: (err) => {
-                console.error('Error login:', err);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error de inicio de sesión',
-                    detail: 'Correo o contraseña incorrectos',
-                    life: 5000
-                });
+                console.error('Error de login:', err);
+                
+                let errorMessage = 'Error de conexión con el servidor';
+                
+                if (err.status === 400) {
+                    errorMessage = 'Datos inválidos. Verifica email y contraseña';
+                } else if (err.status === 401) {
+                    errorMessage = 'Credenciales incorrectas';
+                } else if (err.status === 403) {
+                    errorMessage = 'Cuenta bloqueada o sin permisos';
+                } else if (err.status === 404) {
+                    errorMessage = 'Usuario no existe';
+                } else if (err.status === 429) {
+                    errorMessage = 'Demasiados intentos. Intenta más tarde';
+                } else if (err.status === 500) {
+                    errorMessage = 'Error del servidor. Intenta más tarde';
+                } else if (err.error?.detail) {
+                    errorMessage = err.error.detail;
+                } else if (err.error?.message) {
+                    errorMessage = err.error.message;
+                } else if (err.status === 0) {
+                    errorMessage = 'Sin conexión al servidor';
+                }
+
+                this.errorMessage = errorMessage;
+                this.loading = false;
             }
         });
     }

@@ -13,6 +13,8 @@ import { TagModule } from 'primeng/tag';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { EmployeesService } from './employees.service';
 import { DatePicker } from 'primeng/datepicker';
+import { convertEmployeeId } from '../../../shared/utils/employee-id.util';
+import { sanitizeForLog } from '../../../shared/utils/error.util';
 
 @Component({
   selector: 'app-employees',
@@ -212,6 +214,7 @@ export class EmployeesComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
+        console.error('Error loading employees:', sanitizeForLog(error));
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -228,7 +231,7 @@ export class EmployeesComponent implements OnInit {
         // Filtrar solo usuarios con tenant o mostrar advertencia
         this.availableUsers = data.filter(user => {
           if (!user.tenant_id) {
-            console.warn(`Usuario ${user.email} no tiene tenant asignado`);
+            console.warn(`Usuario ${sanitizeForLog(user.email)} no tiene tenant asignado`);
             return false; // No mostrar usuarios sin tenant
           }
           return true;
@@ -304,7 +307,7 @@ export class EmployeesComponent implements OnInit {
         this.saving = false;
       },
       error: (error) => {
-        console.error('Error saving employee:', error);
+        console.error('Error saving employee:', sanitizeForLog(error));
         let errorMsg = 'Error al guardar empleado';
         if (error.error) {
           if (typeof error.error === 'string') {
