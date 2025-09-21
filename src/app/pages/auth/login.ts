@@ -72,8 +72,8 @@ import { MessageService } from 'primeng/api';
     `
 })
 export class Login {
-    email: string = 'juan@admin.com';
-    password: string = 'admin123';
+    email: string = '';
+    password: string = '';
     checked: boolean = false;
     errorMessage: string = '';
     loading: boolean = false;
@@ -88,7 +88,7 @@ export class Login {
     login() {
         this.errorMessage = '';
         this.loading = true;
-        
+
         // Validar campos antes de enviar
         if (!this.email || !this.password) {
             this.errorMessage = 'Por favor ingresa email y contraseña';
@@ -152,9 +152,9 @@ export class Login {
             },
             error: (err) => {
                 console.error('Error de login:', err);
-                
+
                 let errorMessage = 'Error de conexión con el servidor';
-                
+
                 if (err.status === 400) {
                     errorMessage = 'Datos inválidos. Verifica email y contraseña';
                 } else if (err.status === 401) {

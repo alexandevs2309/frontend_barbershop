@@ -62,9 +62,11 @@ import { Toast } from 'primeng/toast';
                         </td>
                         <td>{{ plan.createdAt | date: 'short' }}</td>
                         <td>{{ plan.durationMonths }}</td>
-                        <td class="flex gap-2">
-                            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text" pTooltip="Editar" (click)="openEditDialog(plan)"></button>
-                            <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" pTooltip="Eliminar" (click)="deletePlan(plan)"></button>
+                        <td>
+                            <div class="flex flex-wrap">
+                                <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text mr-1" pTooltip="Editar" (click)="openEditDialog(plan)"></button>
+                                <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" pTooltip="Eliminar" (click)="deletePlan(plan)"></button>
+                            </div>
                         </td>
                     </tr>
                 </ng-template>

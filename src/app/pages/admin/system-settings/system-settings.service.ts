@@ -5,15 +5,38 @@ import { environment } from '../../../../environment';
 
 export interface SystemSettings {
   id?: number;
+  
+  // Configuración General
   platform_name: string;
   support_email: string;
-  maintenance_mode: boolean;
-  default_currency: string;
+  
+  // Configuración de Clientes
   max_tenants: number;
-  backup_frequency: string;
+  trial_days: number;
+  default_currency: string;
+  
+  // Configuración de Plataforma
+  platform_domain: string;
+  supported_languages: string[];
+  platform_commission_rate: number;
+  
+  // Límites por Plan
+  basic_plan_max_employees: number;
+  premium_plan_max_employees: number;
+  enterprise_plan_max_employees: number;
+  
+  // Integraciones Globales
+  stripe_enabled: boolean;
+  paypal_enabled: boolean;
+  twilio_enabled: boolean;
+  sendgrid_enabled: boolean;
+  aws_s3_enabled: boolean;
+  
+  // Preferencias del Sistema
+  maintenance_mode: boolean;
   email_notifications: boolean;
   auto_suspend_expired: boolean;
-  trial_days: number;
+  
   created_at?: string;
   updated_at?: string;
 }

@@ -31,18 +31,19 @@ import { LazyLoadEvent } from 'primeng/api';
     template: `
         <p-card header="Gestión de Usuarios">
             <!-- SOLO búsqueda por texto + Export -->
-            <div class="my-3 flex gap-2 items-center">
-                <button pButton label="Nuevo Usuario" icon="pi pi-plus" class="p-button-success" (click)="openNewUserForm()"></button>
-                <button pButton label="Ver Eliminados" icon="pi pi-trash" class="p-button-secondary" (click)="showDeletedUsers()"></button>
-
-                <span class="mx-4"></span>
-                <span class="p-input-icon-left">
-                    <i class="pi pi-search"></i>
-                    <input pInputText type="text" placeholder="Buscar (nombre o email)" [(ngModel)]="search" (input)="onSearchInput()" style="width: 260px" />
-                </span>
-
-                <span class="flex-1"></span>
-                <button pButton label="Exportar CSV" icon="pi pi-download" (click)="exportCsv()"></button>
+            <div class="flex flex-column md:flex-row align-items-center justify-content-between mb-3">
+                <div class="flex flex-wrap align-items-center mb-2 md:mb-0">
+                    <button pButton label="Nuevo Usuario" icon="pi pi-plus" class="p-button-success mr-2 mb-2 md:mb-0" (click)="openNewUserForm()"></button>
+                    <button pButton label="Ver Eliminados" icon="pi pi-trash" class="p-button-secondary mr-2 mb-2 md:mb-0" (click)="showDeletedUsers()"></button>
+                </div>
+                
+                <div class="flex flex-wrap align-items-center">
+                    <span class="p-input-icon-left mr-2 mb-2 md:mb-0">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" placeholder="Buscar (nombre o email)" [(ngModel)]="search" (input)="onSearchInput()" class="w-full" style="min-width: 260px" />
+                    </span>
+                    <button pButton label="Exportar CSV" icon="pi pi-download" class="mb-2 md:mb-0" (click)="exportCsv()"></button>
+                </div>
             </div>
 
             <p-table
@@ -97,11 +98,13 @@ import { LazyLoadEvent } from 'primeng/api';
                         </td>
                         <td>{{ user.date_joined | date: 'shortDate' }}</td>
                         <td>{{ user.tenant || '-' }}</td>
-                        <td class="flex gap-2">
-                            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text" pTooltip="Editar" (click)="onEditUser(user)"></button>
-                            <button pButton icon="pi pi-key" class="p-button-rounded p-button-text" pTooltip="Cambiar contraseña" (click)="openPwdDialog(user.id)"></button>
-                            <button pButton icon="pi pi-history" class="p-button-rounded p-button-text" pTooltip="Ver logs" (click)="openLogs(user.id)"></button>
-                            <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" pTooltip="Eliminar" (click)="confirmDeleteUser(user)"></button>
+                        <td>
+                            <div class="flex flex-wrap">
+                                <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text mr-1" pTooltip="Editar" (click)="onEditUser(user)"></button>
+                                <button pButton icon="pi pi-key" class="p-button-rounded p-button-text mr-1" pTooltip="Cambiar contraseña" (click)="openPwdDialog(user.id)"></button>
+                                <button pButton icon="pi pi-history" class="p-button-rounded p-button-text mr-1" pTooltip="Ver logs" (click)="openLogs(user.id)"></button>
+                                <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" pTooltip="Eliminar" (click)="confirmDeleteUser(user)"></button>
+                            </div>
                         </td>
                     </tr>
                 </ng-template>

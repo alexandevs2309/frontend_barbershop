@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import {  EntitlementsService } from './app/layout/service/entitlements.service';
+import { EntitlementsService } from './app/layout/service/entitlements.service';
 
 @Component({
     selector: 'app-root',
@@ -8,8 +8,10 @@ import {  EntitlementsService } from './app/layout/service/entitlements.service'
     imports: [RouterModule],
     template: `<router-outlet></router-outlet>`
 })
-export class AppComponent {
-constructor(private ent: EntitlementsService) {}
-ngOnInit() { this.ent.load().subscribe(); }
-
+export class AppComponent implements OnInit {
+    constructor(private ent: EntitlementsService) {}
+    
+    ngOnInit() { 
+        this.ent.load().subscribe();
+    }
 }

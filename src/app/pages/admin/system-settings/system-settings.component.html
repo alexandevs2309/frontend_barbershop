@@ -97,56 +97,166 @@
 
                 <p-divider></p-divider>
 
-                <!-- Configuración del Sistema -->
+                <!-- Configuración de Plataforma -->
                 <h6 class="text-900 font-semibold mb-3">
-                    <i class="pi pi-server mr-2"></i>
-                    Configuración del Sistema
+                    <i class="pi pi-globe mr-2"></i>
+                    Configuración de Plataforma
                 </h6>
 
                 <div class="formgrid grid">
-                    <div class="field col-12 md:col-6">
-                        <label for="backup_frequency" class="block text-900 font-medium mb-2">
-                            Frecuencia de Respaldo *
+                    <div class="field col-12 md:col-4">
+                        <label for="platform_domain" class="block text-900 font-medium mb-2">
+                            Dominio Principal *
                         </label>
-                        <p-dropdown id="backup_frequency" [options]="backupFrequencyOptions" 
-                                    formControlName="backup_frequency" optionLabel="label" 
-                                    optionValue="value" placeholder="Seleccionar frecuencia" 
-                                    class="w-full">
-                        </p-dropdown>
+                        <input pInputText id="platform_domain" formControlName="platform_domain" 
+                               placeholder="barbersaas.com" class="w-full" />
+                        <small class="p-error block mt-1" *ngIf="getFieldError('platform_domain')">
+                            {{ getFieldError('platform_domain') }}
+                        </small>
+                    </div>
+
+                    <div class="field col-12 md:col-4">
+                        <label for="supported_languages" class="block text-900 font-medium mb-2">
+                            Idiomas Habilitados *
+                        </label>
+                        <p-multiSelect id="supported_languages" [options]="languageOptions" 
+                                       formControlName="supported_languages" optionLabel="label" 
+                                       optionValue="value" placeholder="Seleccionar idiomas" 
+                                       class="w-full">
+                        </p-multiSelect>
+                    </div>
+
+                    <div class="field col-12 md:col-4">
+                        <label for="platform_commission_rate" class="block text-900 font-medium mb-2">
+                            Comisión de Plataforma (%) *
+                        </label>
+                        <p-inputNumber id="platform_commission_rate" formControlName="platform_commission_rate" 
+                                       [min]="0" [max]="50" suffix="%" class="w-full">
+                        </p-inputNumber>
+                        <small class="p-error block mt-1" *ngIf="getFieldError('platform_commission_rate')">
+                            {{ getFieldError('platform_commission_rate') }}
+                        </small>
                     </div>
                 </div>
 
+                <p-divider></p-divider>
+
+                <!-- Límites por Plan -->
+                <h6 class="text-900 font-semibold mb-3">
+                    <i class="pi pi-tags mr-2"></i>
+                    Límites por Plan
+                </h6>
+
+                <div class="formgrid grid">
+                    <div class="field col-12 md:col-4">
+                        <label for="basic_plan_max_employees" class="block text-900 font-medium mb-2">
+                            Plan Básico - Máx. Empleados *
+                        </label>
+                        <p-inputNumber id="basic_plan_max_employees" formControlName="basic_plan_max_employees" 
+                                       [min]="1" [max]="100" class="w-full">
+                        </p-inputNumber>
+                    </div>
+
+                    <div class="field col-12 md:col-4">
+                        <label for="premium_plan_max_employees" class="block text-900 font-medium mb-2">
+                            Plan Premium - Máx. Empleados *
+                        </label>
+                        <p-inputNumber id="premium_plan_max_employees" formControlName="premium_plan_max_employees" 
+                                       [min]="1" [max]="500" class="w-full">
+                        </p-inputNumber>
+                    </div>
+
+                    <div class="field col-12 md:col-4">
+                        <label for="enterprise_plan_max_employees" class="block text-900 font-medium mb-2">
+                            Plan Enterprise - Máx. Empleados *
+                        </label>
+                        <p-inputNumber id="enterprise_plan_max_employees" formControlName="enterprise_plan_max_employees" 
+                                       [min]="1" [max]="9999" class="w-full">
+                        </p-inputNumber>
+                    </div>
+                </div>
+
+                <p-divider></p-divider>
+
+                <!-- Integraciones Globales -->
+                <h6 class="text-900 font-semibold mb-3">
+                    <i class="pi pi-link mr-2"></i>
+                    Integraciones Globales
+                </h6>
+
+                <div class="formgrid grid">
+                    <div class="field-checkbox col-12 md:col-4">
+                        <p-checkbox formControlName="stripe_enabled" [binary]="true" 
+                                    inputId="stripe"></p-checkbox>
+                        <label for="stripe" class="ml-2 text-900">
+                            Stripe Habilitado
+                        </label>
+                    </div>
+
+                    <div class="field-checkbox col-12 md:col-4">
+                        <p-checkbox formControlName="paypal_enabled" [binary]="true" 
+                                    inputId="paypal"></p-checkbox>
+                        <label for="paypal" class="ml-2 text-900">
+                            PayPal Habilitado
+                        </label>
+                    </div>
+
+                    <div class="field-checkbox col-12 md:col-4">
+                        <p-checkbox formControlName="twilio_enabled" [binary]="true" 
+                                    inputId="twilio"></p-checkbox>
+                        <label for="twilio" class="ml-2 text-900">
+                            SMS (Twilio) Habilitado
+                        </label>
+                    </div>
+
+                    <div class="field-checkbox col-12 md:col-4">
+                        <p-checkbox formControlName="sendgrid_enabled" [binary]="true" 
+                                    inputId="sendgrid"></p-checkbox>
+                        <label for="sendgrid" class="ml-2 text-900">
+                            Email (SendGrid) Habilitado
+                        </label>
+                    </div>
+
+                    <div class="field-checkbox col-12 md:col-4">
+                        <p-checkbox formControlName="aws_s3_enabled" [binary]="true" 
+                                    inputId="aws_s3"></p-checkbox>
+                        <label for="aws_s3" class="ml-2 text-900">
+                            Almacenamiento (AWS S3) Habilitado
+                        </label>
+                    </div>
+                </div>
+
+                <p-divider></p-divider>
+
                 <!-- Preferencias del Sistema -->
-                <div class="mt-4">
-                    <h6 class="text-900 font-semibold mb-3">
-                        <i class="pi pi-sliders-h mr-2"></i>
-                        Preferencias del Sistema
-                    </h6>
+                <h6 class="text-900 font-semibold mb-3">
+                    <i class="pi pi-sliders-h mr-2"></i>
+                    Preferencias del Sistema
+                </h6>
 
-                    <div class="formgrid grid">
-                        <div class="field-checkbox col-12 md:col-4">
-                            <p-checkbox formControlName="maintenance_mode" [binary]="true" 
-                                        inputId="maintenance"></p-checkbox>
-                            <label for="maintenance" class="ml-2 text-900">
-                                Modo Mantenimiento
-                            </label>
-                        </div>
+                <div class="formgrid grid">
+                    <div class="field-checkbox col-12 md:col-4">
+                        <p-checkbox formControlName="maintenance_mode" [binary]="true" 
+                                    inputId="maintenance"></p-checkbox>
+                        <label for="maintenance" class="ml-2 text-900">
+                            Modo Mantenimiento
+                        </label>
+                    </div>
 
-                        <div class="field-checkbox col-12 md:col-4">
-                            <p-checkbox formControlName="email_notifications" [binary]="true" 
-                                        inputId="email_notifications"></p-checkbox>
-                            <label for="email_notifications" class="ml-2 text-900">
-                                Notificaciones por Email
-                            </label>
-                        </div>
+                    <div class="field-checkbox col-12 md:col-4">
+                        <p-checkbox formControlName="email_notifications" [binary]="true" 
+                                    inputId="email_notifications"></p-checkbox>
+                        <label for="email_notifications" class="ml-2 text-900">
+                            Notificaciones por Email
+                        </label>
+                    </div>
 
-                        <div class="field-checkbox col-12 md:col-4">
-                            <p-checkbox formControlName="auto_suspend_expired" [binary]="true" 
-                                        inputId="auto_suspend"></p-checkbox>
-                            <label for="auto_suspend" class="ml-2 text-900">
-                                Suspender Automáticamente Vencidos
-                            </label>
-                        </div>
+                    <div class="field-checkbox col-12 md:col-4">
+                        <p-checkbox formControlName="auto_suspend_expired" [binary]="true" 
+                                    inputId="auto_suspend"></p-checkbox>
+                        <label for="auto_suspend" class="ml-2 text-900">
+                            Suspender Automáticamente Vencidos
+                        </label>
                     </div>
                 </div>
             </form>

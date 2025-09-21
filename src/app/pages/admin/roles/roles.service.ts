@@ -33,10 +33,32 @@ export class RoleService {
   // Listar roles
   getRoles(): Observable<Role[]> {
     console.log('🔗 URL de roles:', this.apiUrl);
-    return this.http.get<{ results: Role[] }>(this.apiUrl).pipe(
+    return this.http.get<any>(this.apiUrl).pipe(
       map(response => {
-        console.log('📝 Respuesta del servidor:', response.results?.length || 0, 'roles');
-        return response.results;
+        console.log('📦 Respuesta completa:', response);
+        console.log('📦 Tipo de respuesta:', typeof response);
+        console.log('📦 Es array?:', Array.isArray(response));
+        
+        // Si es un array directo
+        if (Array.isArray(response)) {
+          console.log('✅ Array directo con', response.length, 'roles');
+          return response;
+        }
+        
+        // Si tiene estructura { results: [] }
+        if (response && response.results) {
+          console.log('✅ Estructura results con', response.results.length, 'roles');
+          return response.results;
+        }
+        
+        // Si tiene estructura { data: [] }
+        if (response && response.data) {
+          console.log('✅ Estructura data con', response.data.length, 'roles');
+          return response.data;
+        }
+        
+        console.log('⚠️ Estructura desconocida, devolviendo array vacío');
+        return [];
       })
     );
   }
@@ -65,10 +87,17 @@ export class RoleService {
   getPermissions(): Observable<Permission[]> {
     const permissionsUrl = `${environment.apiUrl}/roles/roles/permissions/`;
     console.log('🔗 URL de permisos:', permissionsUrl);
-    return this.http.get<{ results: Permission[] }>(permissionsUrl).pipe(
+    return this.http.get<Permission[]>(permissionsUrl).pipe(
       map(response => {
-        console.log('📝 Respuesta de permisos:', response.results?.length || 0, 'permisos');
-        return response.results || [];
+        // Si la respuesta es un array directamente
+        if (Array.isArray(response)) {
+          console.log('📝 Respuesta de permisos:', response.length, 'permisos');
+          return response;
+        }
+        // Si la respuesta tiene estructura { results: [] }
+        const permissions = (response as any)?.results || [];
+        console.log('📝 Respuesta de permisos:', permissions.length, 'permisos');
+        return permissions;
       })
     );
   }

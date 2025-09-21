@@ -12,6 +12,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { SystemSettingsService, SystemSettings } from './system-settings.service';
 
 @Component({
@@ -29,7 +30,8 @@ import { SystemSettingsService, SystemSettings } from './system-settings.service
     ButtonModule,
     DividerModule,
     ProgressSpinnerModule,
-    CheckboxModule
+    CheckboxModule,
+    MultiSelectModule
   ],
   templateUrl: './system-settings.component.html',
   styleUrl: './system-settings.component.scss',
@@ -47,10 +49,11 @@ export class SystemSettingsComponent implements OnInit {
     { label: 'Euro (EUR)', value: 'EUR' }
   ];
 
-  backupFrequencyOptions = [
-    { label: 'Diario', value: 'daily' },
-    { label: 'Semanal', value: 'weekly' },
-    { label: 'Mensual', value: 'monthly' }
+  languageOptions = [
+    { label: 'Español', value: 'es' },
+    { label: 'English', value: 'en' },
+    { label: 'Português', value: 'pt' },
+    { label: 'Français', value: 'fr' }
   ];
 
   constructor(
@@ -68,15 +71,36 @@ export class SystemSettingsComponent implements OnInit {
 
   initForm() {
     this.settingsForm = this.fb.group({
+      // Configuración General
       platform_name: ['BarberSaaS', Validators.required],
       support_email: ['', [Validators.required, Validators.email]],
-      maintenance_mode: [false],
-      default_currency: ['USD', Validators.required],
+      
+      // Configuración de Clientes
       max_tenants: [100, [Validators.required, Validators.min(1)]],
-      backup_frequency: ['daily', Validators.required],
+      trial_days: [7, [Validators.required, Validators.min(0), Validators.max(365)]],
+      default_currency: ['USD', Validators.required],
+      
+      // Configuración de Plataforma
+      platform_domain: ['', Validators.required],
+      supported_languages: [['es', 'en'], Validators.required],
+      platform_commission_rate: [5, [Validators.required, Validators.min(0), Validators.max(50)]],
+      
+      // Límites por Plan
+      basic_plan_max_employees: [5, [Validators.required, Validators.min(1)]],
+      premium_plan_max_employees: [25, [Validators.required, Validators.min(1)]],
+      enterprise_plan_max_employees: [999, [Validators.required, Validators.min(1)]],
+      
+      // Integraciones Globales
+      stripe_enabled: [true],
+      paypal_enabled: [false],
+      twilio_enabled: [false],
+      sendgrid_enabled: [true],
+      aws_s3_enabled: [true],
+      
+      // Preferencias del Sistema
+      maintenance_mode: [false],
       email_notifications: [true],
-      auto_suspend_expired: [true],
-      trial_days: [7, [Validators.required, Validators.min(0), Validators.max(365)]]
+      auto_suspend_expired: [true]
     });
   }
 
@@ -89,14 +113,22 @@ export class SystemSettingsComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
+        console.error('Error al cargar configuraciones:', error);
         if (error.status === 404) {
           // No hay configuraciones, usar valores por defecto
           this.currentSettings = null;
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Configuraciones Iniciales',
+            detail: 'Se están usando valores por defecto. Guarde para crear la configuración inicial.',
+            life: 6000
+          });
         } else {
           this.messageService.add({
             severity: 'error',
-            summary: 'Error',
-            detail: 'Error al cargar configuraciones del sistema'
+            summary: 'Error de Carga',
+            detail: 'No se pudieron cargar las configuraciones del sistema',
+            life: 8000
           });
         }
         this.loading = false;
@@ -107,6 +139,11 @@ export class SystemSettingsComponent implements OnInit {
   saveSettings() {
     if (this.settingsForm.invalid) {
       this.markFormGroupTouched(this.settingsForm);
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Formulario Inválido',
+        detail: 'Por favor, corrija los errores en el formulario antes de guardar'
+      });
       return;
     }
 
@@ -118,16 +155,30 @@ export class SystemSettingsComponent implements OnInit {
         this.currentSettings = settings;
         this.messageService.add({
           severity: 'success',
-          summary: 'Éxito',
-          detail: 'Configuraciones del sistema guardadas correctamente'
+          summary: 'Configuraciones Guardadas',
+          detail: 'Las configuraciones del sistema se han guardado correctamente',
+          life: 5000
         });
         this.saving = false;
       },
       error: (error) => {
+        console.error('Error al guardar configuraciones:', error);
+        let errorMessage = 'Error al guardar configuraciones del sistema';
+        
+        if (error.error && error.error.detail) {
+          errorMessage = error.error.detail;
+        } else if (error.error && typeof error.error === 'object') {
+          const firstError = Object.values(error.error)[0];
+          if (Array.isArray(firstError)) {
+            errorMessage = firstError[0];
+          }
+        }
+        
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'Error al guardar configuraciones del sistema'
+          summary: 'Error al Guardar',
+          detail: errorMessage,
+          life: 8000
         });
         this.saving = false;
       }
@@ -136,26 +187,34 @@ export class SystemSettingsComponent implements OnInit {
 
   resetToDefaults() {
     this.confirmationService.confirm({
-      message: '¿Está seguro de restablecer todas las configuraciones a los valores por defecto?',
+      message: '¿Está seguro de restablecer todas las configuraciones a los valores por defecto? Esta acción no se puede deshacer.',
       header: 'Confirmar Restablecimiento',
       icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, restablecer',
+      rejectLabel: 'Cancelar',
       accept: () => {
+        this.loading = true;
         this.systemSettingsService.resetToDefaults().subscribe({
           next: (settings) => {
             this.currentSettings = settings;
             this.settingsForm.patchValue(settings);
             this.messageService.add({
               severity: 'success',
-              summary: 'Éxito',
-              detail: 'Configuraciones restablecidas a valores por defecto'
+              summary: 'Configuraciones Restablecidas',
+              detail: 'Todas las configuraciones han sido restablecidas a sus valores por defecto',
+              life: 5000
             });
+            this.loading = false;
           },
-          error: () => {
+          error: (error) => {
+            console.error('Error al restablecer configuraciones:', error);
             this.messageService.add({
               severity: 'error',
-              summary: 'Error',
-              detail: 'Error al restablecer configuraciones'
+              summary: 'Error al Restablecer',
+              detail: 'No se pudieron restablecer las configuraciones. Inténtelo nuevamente.',
+              life: 8000
             });
+            this.loading = false;
           }
         });
       }
@@ -167,8 +226,14 @@ export class SystemSettingsComponent implements OnInit {
     if (field && field.invalid && field.touched) {
       if (field.errors?.['required']) return 'Este campo es obligatorio';
       if (field.errors?.['email']) return 'Email inválido';
-      if (field.errors?.['min']) return 'Valor mínimo no válido';
-      if (field.errors?.['max']) return 'Valor máximo no válido';
+      if (field.errors?.['min']) {
+        const minValue = field.errors['min'].min;
+        return `El valor mínimo es ${minValue}`;
+      }
+      if (field.errors?.['max']) {
+        const maxValue = field.errors['max'].max;
+        return `El valor máximo es ${maxValue}`;
+      }
     }
     return null;
   }

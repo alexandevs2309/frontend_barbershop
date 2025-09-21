@@ -10,11 +10,12 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import { CardModule } from 'primeng/card';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { AccordionModule } from 'primeng/accordion';
+import { TooltipModule } from 'primeng/tooltip';
 import { sanitizeForLog } from '../../../shared/utils/error.util';
 
 @Component({
@@ -31,11 +32,12 @@ import { sanitizeForLog } from '../../../shared/utils/error.util';
     ButtonModule,
     InputTextModule,
     TextareaModule,
-    DropdownModule,
+    SelectModule,
     CheckboxModule,
     ConfirmDialogModule,
     CardModule,
-    AccordionModule
+    AccordionModule,
+    TooltipModule
   ],
   templateUrl: './roles.component.html',
   styleUrls: ['./roles.component.scss'],
@@ -103,20 +105,42 @@ export class RoleComponent implements OnInit {
 
   loadRoles() {
     console.log('🔄 Cargando roles...');
+    const token = localStorage.getItem('access_token');
+    console.log('🔑 Token disponible:', !!token);
+    if (token) {
+      console.log('🔑 Token (primeros 50 chars):', token.substring(0, 50) + '...');
+    }
+    
     this.loadingStates.roles = true;
     this.roleService.getRoles().subscribe({
       next: data => {
-        console.log('✅ Roles cargados:', data.length, 'roles');
-        this.roles = data;
+        const roles = Array.isArray(data) ? data : [];
+        console.log('✅ Roles cargados:', roles.length, 'roles');
+        console.log('📋 Datos recibidos:', data);
+        this.roles = roles;
         this.loadingStates.roles = false;
       },
       error: (error) => {
         console.error('❌ Error cargando roles:', sanitizeForLog(error));
-        this.messageService.add({ 
-          severity: 'error', 
-          summary: 'Error', 
-          detail: 'No se pudieron cargar los roles. Verifica la conexión.' 
-        });
+        console.error('📊 Status del error:', error.status);
+        console.error('💬 Mensaje del error:', error.error);
+        
+        if (error.status === 401) {
+          console.log('⚠️ Error de autenticación - redirigiendo al login');
+          this.messageService.add({ 
+            severity: 'warn', 
+            summary: 'Sesión Expirada', 
+            detail: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.' 
+          });
+        } else {
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Error', 
+            detail: 'No se pudieron cargar los roles. Verifica la conexión.' 
+          });
+        }
+        
+        this.roles = [];
         this.loadingStates.roles = false;
       }
     });
@@ -127,14 +151,15 @@ export class RoleComponent implements OnInit {
     this.loadingStates.permissions = true;
     this.roleService.getPermissions().subscribe({
       next: data => {
-        console.log('✅ Respuesta completa:', data);
-        console.log('✅ Tipo de data:', typeof data, Array.isArray(data));
-        console.log('✅ Permisos cargados:', data?.length || 0, 'permisos');
+        const permissions = Array.isArray(data) ? data : [];
+        console.log('✅ Respuesta completa:', permissions);
+        console.log('✅ Tipo de data:', typeof permissions, Array.isArray(permissions));
+        console.log('✅ Permisos cargados:', permissions.length, 'permisos');
         
-        if (data && data.length > 0) {
-          console.log('✅ Primer permiso:', data[0]);
-          this.permissions = data;
-          this.groupedPermissions = this.getGroupedPermissions(data);
+        if (permissions.length > 0) {
+          console.log('✅ Primer permiso:', permissions[0]);
+          this.permissions = permissions;
+          this.groupedPermissions = this.getGroupedPermissions(permissions);
           console.log('✅ Grupos creados:', Object.keys(this.groupedPermissions));
         } else {
           console.log('⚠️ No hay permisos en la respuesta');
@@ -474,4 +499,6 @@ export class RoleComponent implements OnInit {
     }
     return null;
   }
+
+
 }
