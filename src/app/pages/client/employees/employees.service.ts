@@ -79,4 +79,18 @@ export class EmployeesService {
   getEmployeeStats(employeeId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${employeeId}/stats/`);
   }
+
+  getAvailableServices(): Observable<any[]> {
+    return this.http.get<any>(`${environment.apiUrl}/services/services/`).pipe(
+      map(response => {
+        if (Array.isArray(response)) {
+          return response;
+        } else if (response.results) {
+          return response.results;
+        } else {
+          return [];
+        }
+      })
+    );
+  }
 }

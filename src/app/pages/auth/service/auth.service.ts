@@ -92,30 +92,29 @@ export class AuthService {
    * Guardar tokens de forma segura (solo datos no sensibles en localStorage)
    */
 setTokens(tokens: { access: string; refresh: string }, remember: boolean, user?: any) {
-  // Solo guardar datos no sensibles del usuario en localStorage
   if (user) {
     const safeUserData = {
       id: user.id,
       email: user.email,
       role: user.role,
       full_name: user.full_name,
-      roles: user.roles // IMPORTANTE: incluir roles para el guard
+      roles: user.roles,
+      remember: remember
     };
     const storage = remember ? localStorage : sessionStorage;
     storage.setItem('user', JSON.stringify(safeUserData));
   }
   
-  // NOTA: Los tokens deberían manejarse como httpOnly cookies desde el backend
-  // Por ahora mantenemos en sessionStorage como medida temporal
   const storage = remember ? localStorage : sessionStorage;
   storage.setItem('access_token', tokens.access);
   storage.setItem('refresh_token', tokens.refresh);
+  storage.setItem('remember_me', remember.toString());
   
-  // Limpiar el storage opuesto
   const oppositeStorage = remember ? sessionStorage : localStorage;
   oppositeStorage.removeItem('access_token');
   oppositeStorage.removeItem('refresh_token');
   oppositeStorage.removeItem('user');
+  oppositeStorage.removeItem('remember_me');
 }
 
 
@@ -226,20 +225,49 @@ getCurrentUser(): any {
    * Obtener el refresh token actual
    */
   getRefreshToken(): string | null {
-    return this.getStorage().getItem('refresh_token');
+    return localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token');
+  }
+
+  /**
+   * Refrescar token automáticamente
+   */
+  refreshToken(): Observable<any> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    return this.http.post<any>(`${this.baseUrl}/auth/token/refresh/`, {
+      refresh: refreshToken
+    }).pipe(
+      tap((response) => {
+        const remember = localStorage.getItem('remember_me') === 'true' || sessionStorage.getItem('remember_me') === 'true';
+        const storage = remember ? localStorage : sessionStorage;
+        storage.setItem('access_token', response.access);
+        if (response.refresh) {
+          storage.setItem('refresh_token', response.refresh);
+        }
+      }),
+      catchError((error) => {
+        this.logout(); // Si no se puede refrescar, cerrar sesión
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
    * Eliminar tokens al cerrar sesión
    */
   logout(): void {
-    this.setCurrentUser(null)
+    this.setCurrentUser(null);
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
+    localStorage.removeItem('remember_me');
     sessionStorage.removeItem('access_token');
     sessionStorage.removeItem('refresh_token');
     sessionStorage.removeItem('user');
+    sessionStorage.removeItem('remember_me');
 
     this.router.navigate(['/auth/login']);
   }

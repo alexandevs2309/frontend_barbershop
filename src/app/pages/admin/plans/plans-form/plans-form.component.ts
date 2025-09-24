@@ -56,8 +56,15 @@ import { CommonModule } from '@angular/common';
 
                 <div class="field my-4">
                     <p-floatlabel variant="on">
-                        <p-inputnumber class="w-full" formControlName="usersLimit" [min]="1" [max]="50" [showButtons]="true" mode="decimal" locale="en-US" />
-                        <label for="limite">Límite de Usuarios</label>
+                        <p-inputnumber class="w-full" formControlName="employeesLimit" [min]="1" [max]="500" [showButtons]="true" mode="decimal" locale="en-US" />
+                        <label for="employeesLimit">Límite de Empleados</label>
+                    </p-floatlabel>
+                </div>
+
+                <div class="field my-4">
+                    <p-floatlabel variant="on">
+                        <p-inputnumber class="w-full" formControlName="usersLimit" [min]="1" [max]="1000" [showButtons]="true" mode="decimal" locale="en-US" />
+                        <label for="usersLimit">Límite de Usuarios</label>
                     </p-floatlabel>
                 </div>
 
@@ -136,8 +143,8 @@ export class PlansFormComponent implements OnInit {
             name: ['', Validators.required],
             price: [null, [Validators.required, Validators.min(0)]],
             description: ['', Validators.required],
-            durationMonths: [1, [Validators.required, Validators.min(1)]], // <-- duración en meses
-            // sin required; solo min(1). Cuando isUnlimited=true, se deshabilita.
+            durationMonths: [1, [Validators.required, Validators.min(1)]],
+            employeesLimit: [{ value: null, disabled: false }, [Validators.min(1)]],
             usersLimit: [{ value: null, disabled: false }, [Validators.min(1)]],
             features: [[]],
             isActive: [true],

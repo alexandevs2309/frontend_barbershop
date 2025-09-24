@@ -37,16 +37,16 @@ import { BUSINESS_CONSTANTS } from '../../../shared/constants/business.constants
       <div class="flex gap-3 mb-4">
         <span class="p-input-icon-left flex-1">
           <i class="pi pi-search"></i>
-          <input pInputText type="text" [(ngModel)]="searchTerm" (input)="searchSubject.next(searchTerm)" placeholder="Buscar servicios..." class="w-full">
+          <input pInputText type="text" [(ngModel)]="searchTerm" (input)="searchSubject.next(searchTerm)" placeholder="Buscar servicios..." class="min-w-64 mx-2">
 
         </span>
 
         <p-select [options]="categoryOptions" [(ngModel)]="selectedCategory"
-                  (onChange)="loadServices()" placeholder="Todas las categorías"
+                  (onChange)="onCategoryChange()" placeholder="Todas las categorías"
                   [showClear]="true" class="w-12rem"></p-select>
 
         <p-select [options]="statusOptions" [(ngModel)]="selectedStatus"
-                  (onChange)="loadServices()" placeholder="Todos los estados"
+                  (onChange)="onStatusChange()" placeholder="Todos los estados"
                   [showClear]="true" class="w-10rem"></p-select>
       </div>
 
@@ -76,7 +76,7 @@ import { BUSINESS_CONSTANTS } from '../../../shared/constants/business.constants
               </div>
             </td>
             <td>
-              <p-tag [value]="service.category || 'Sin categoría'"
+              <p-tag [value]="getServiceCategory(service)"
                      severity="info" class="text-sm"></p-tag>
             </td>
             <td class="font-semibold">{{ service.price | currency:'USD':'symbol':'1.2-2' }}</td>
@@ -130,7 +130,8 @@ import { BUSINESS_CONSTANTS } from '../../../shared/constants/business.constants
 
         <div class="field col-12 md:col-6">
           <label for="category">Categoría</label>
-          <p-select [options]="categories" [(ngModel)]="service.category"
+          <p-select [options]="categoryOptionsForForm" [(ngModel)]="service.category"
+                    optionLabel="label" optionValue="value"
                     placeholder="Seleccionar categoría" [editable]="true" class="w-full"></p-select>
         </div>
 
@@ -185,7 +186,7 @@ import { BUSINESS_CONSTANTS } from '../../../shared/constants/business.constants
         </div>
         <div class="col-6">
           <strong>Categoría:</strong><br>
-          {{ selectedService.category || 'Sin categoría' }}
+          {{ getServiceCategory(selectedService) }}
         </div>
         <div class="col-6">
           <strong>Precio:</strong><br>
@@ -214,7 +215,7 @@ import { BUSINESS_CONSTANTS } from '../../../shared/constants/business.constants
         <h4>{{ selectedService.name }}</h4>
         <p class="text-muted mb-4">Selecciona los empleados que pueden realizar este servicio</p>
 
-        <div class="employee-list">
+        <div class="employee-list" *ngIf="allEmployees.length > 0; else noEmployees">
           <div class="employee-item flex align-items-center justify-content-between p-3 border-round mb-2"
                *ngFor="let employee of allEmployees"
                [class.bg-primary-50]="isEmployeeAssigned(employee.id)">
@@ -223,7 +224,7 @@ import { BUSINESS_CONSTANTS } from '../../../shared/constants/business.constants
                      [checked]="isEmployeeAssigned(employee.id)"
                      (change)="toggleEmployeeAssignment(employee.id, $event)">
               <div>
-                <div class="font-semibold">{{ employee.user || employee.name }}</div>
+                <div class="font-semibold">{{ employee.user || employee.name || 'Empleado sin nombre' }}</div>
                 <div class="text-sm text-600">{{ employee.specialty || 'Sin especialidad' }}</div>
               </div>
             </div>
@@ -232,6 +233,14 @@ import { BUSINESS_CONSTANTS } from '../../../shared/constants/business.constants
             </div>
           </div>
         </div>
+        
+        <ng-template #noEmployees>
+          <div class="text-center p-4">
+            <i class="pi pi-users text-4xl text-300 mb-2 block"></i>
+            <p class="text-600">No hay empleados disponibles</p>
+            <p class="text-sm text-500">Primero debe crear empleados en el sistema</p>
+          </div>
+        </ng-template>
       </div>
 
       <ng-template pTemplate="footer">
@@ -270,7 +279,7 @@ import { BUSINESS_CONSTANTS } from '../../../shared/constants/business.constants
           </div>
         </div>
 
-        <div *ngIf="!serviceEmployees.length" class="text-center p-4">
+        <div *ngIf="!serviceEmployees || !serviceEmployees.length" class="text-center p-4">
           <i class="pi pi-users text-4xl text-300 mb-2 block"></i>
           <p class="text-600">No hay empleados asignados a este servicio</p>
           <p-button label="Asignar Empleados" (click)="pricingDialog = false; manageEmployees(selectedService)"></p-button>
@@ -317,7 +326,13 @@ export class ServicesComponent implements OnInit {
 
   searchSubject: Subject<string> = new Subject();
   categoryOptions: any[] = [];
+  
+  get categoryOptionsForForm() {
+    return this.categoryOptions.filter(opt => opt.value !== '');
+  }
+  
   statusOptions = [
+    { label: 'Todos los estados', value: '' },
     { label: 'Activos', value: 'true' },
     { label: 'Inactivos', value: 'false' }
   ];
@@ -347,12 +362,15 @@ export class ServicesComponent implements OnInit {
   }
 
   loadEmployees() {
+    console.log('Loading employees for services management...');
     this.employeesService.getEmployees().subscribe({
       next: (employees: any) => {
+        console.log('Employees loaded:', employees);
         this.allEmployees = Array.isArray(employees) ? employees : (employees?.results || []);
+        console.log('Processed employees:', this.allEmployees);
       },
       error: (error) => {
-        console.error('Error loading employees:', (error));
+        console.error('Error loading employees:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -366,14 +384,28 @@ export class ServicesComponent implements OnInit {
   loadCategories() {
     this.servicesService.getCategories().subscribe({
       next: (categories) => {
-        this.categories = categories;
-        this.categoryOptions = categories.map(cat => ({ label: cat, value: cat }));
+        console.log('Loaded categories from backend:', categories);
+        this.categories = categories.length > 0 ? categories : BUSINESS_CONSTANTS.DEFAULT_CATEGORIES;
+        this.categoryOptions = [
+          { label: 'Todas las categorías', value: '' },
+          ...this.categories.map(cat => ({ label: cat, value: cat })),
+          { label: 'Sin categoría', value: 'Sin categoría' }
+        ];
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.categories = BUSINESS_CONSTANTS.DEFAULT_CATEGORIES;
+        this.categoryOptions = [
+          { label: 'Todas las categorías', value: '' },
+          ...BUSINESS_CONSTANTS.DEFAULT_CATEGORIES.map(cat => ({ label: cat, value: cat })),
+          { label: 'Sin categoría', value: 'Sin categoría' }
+        ];
       }
     });
   }
 
   loadServices(event?: any) {
-    console.log('Loading services...');
+    console.log('Loading services with params:', { searchTerm: this.searchTerm, selectedCategory: this.selectedCategory, selectedStatus: this.selectedStatus });
     this.loading = true;
 
     const params: any = {};
@@ -382,17 +414,27 @@ export class ServicesComponent implements OnInit {
       params.page_size = event.rows;
     }
     if (this.searchTerm) params.search = this.searchTerm;
-    if (this.selectedCategory) params.category = this.selectedCategory;
+    if (this.selectedCategory && this.selectedCategory !== 'Sin categoría') {
+      params.category = this.selectedCategory;
+    }
     if (this.selectedStatus) params.is_active = this.selectedStatus;
+
+    console.log('API params:', params);
 
     this.servicesService.getServices(params).subscribe({
       next: (response) => {
-        this.services = response.results || response;
-        this.totalRecords = response.count || (response.results || response).length;
+        console.log('Services response:', response);
+        const services = response.results || response;
+        // Asegurar que cada servicio tenga una categoría válida
+        this.services = services.map((service: any) => ({
+          ...service,
+          category: service.category || 'Sin categoría'
+        }));
+        this.totalRecords = response.count || services.length;
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error loading services:', (error));
+        console.error('Error loading services:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -401,6 +443,20 @@ export class ServicesComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  getServiceCategory(service: any): string {
+    return service.category || 'Sin categoría';
+  }
+
+  onCategoryChange() {
+    console.log('Category changed to:', this.selectedCategory);
+    this.loadServices();
+  }
+
+  onStatusChange() {
+    console.log('Status changed to:', this.selectedStatus);
+    this.loadServices();
   }
 
   openNew() {
@@ -536,14 +592,22 @@ export class ServicesComponent implements OnInit {
   }
 
   loadServiceEmployees(serviceId: number) {
+    console.log('Loading service employees for service:', serviceId);
     this.servicesService.getServiceEmployees(serviceId).subscribe({
       next: (employees) => {
-        this.serviceEmployees = employees;
-        this.assignedEmployeeIds = employees.map(emp => (emp.employee));
+        console.log('Service employees loaded:', employees);
+        this.serviceEmployees = employees || [];
+        this.assignedEmployeeIds = employees ? employees.map(emp => emp.employee) : [];
       },
-      error: () => {
+      error: (error) => {
+        console.error('Error loading service employees:', error);
         this.serviceEmployees = [];
         this.assignedEmployeeIds = [];
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Información',
+          detail: 'Aún no hay empleados asignados a este servicio'
+        });
       }
     });
   }
@@ -566,9 +630,15 @@ export class ServicesComponent implements OnInit {
   saveEmployeeAssignments() {
     if (!this.selectedService?.id) return;
 
+    console.log('Saving employee assignments:', {
+      serviceId: this.selectedService.id,
+      employeeIds: this.assignedEmployeeIds
+    });
+
     this.savingEmployees = true;
     this.servicesService.assignEmployees(this.selectedService.id, this.assignedEmployeeIds).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('Employee assignment response:', response);
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
@@ -576,8 +646,13 @@ export class ServicesComponent implements OnInit {
         });
         this.employeesDialog = false;
         this.savingEmployees = false;
+        // Recargar la lista de empleados del servicio
+        if (this.selectedService && this.selectedService.id) {
+          this.loadServiceEmployees(this.selectedService.id);
+        }
       },
       error: (error) => {
+        console.error('Error assigning employees:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',

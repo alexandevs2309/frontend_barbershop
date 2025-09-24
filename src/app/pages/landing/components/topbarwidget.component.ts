@@ -3,6 +3,7 @@ import { StyleClassModule } from 'primeng/styleclass';
 import { Router, RouterModule } from '@angular/router';
 import { RippleModule } from 'primeng/ripple';
 import { ButtonModule } from 'primeng/button';
+import { LayoutService } from '../../../layout/service/layout.service';
 
 @Component({
     selector: 'topbar-widget',
@@ -25,7 +26,7 @@ import { ButtonModule } from 'primeng/button';
                     />
                 </g>
             </svg>
-            <span class="text-surface-900 dark:text-surface-0 font-medium text-2xl leading-normal mr-20">SAKAI</span>
+            <span class="text-surface-900 dark:text-surface-0 font-medium text-2xl leading-normal mr-20">BarberPro</span>
         </a>
 
         <a pButton [text]="true" severity="secondary" [rounded]="true" pRipple class="lg:!hidden" pStyleClass="@next" enterClass="hidden" leaveToClass="hidden" [hideOnOutsideClick]="true">
@@ -56,11 +57,21 @@ import { ButtonModule } from 'primeng/button';
                 </li>
             </ul>
             <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
+                <button pButton pRipple [icon]="layoutService.isDarkTheme() ? 'pi pi-sun' : 'pi pi-moon'" 
+                        (click)="toggleDarkMode()" [rounded]="true" [text]="true" 
+                        class="!text-surface-700 dark:!text-surface-300"></button>
                 <button pButton pRipple label="Login" routerLink="/auth/login" [rounded]="true" [text]="true"></button>
                 <button pButton pRipple label="Register" routerLink="/auth/login" [rounded]="true"></button>
             </div>
         </div> `
 })
 export class TopbarWidget {
-    constructor(public router: Router) {}
+    constructor(public router: Router, public layoutService: LayoutService) {}
+
+    toggleDarkMode() {
+        this.layoutService.layoutConfig.update(config => ({
+            ...config,
+            darkTheme: !config.darkTheme
+        }));
+    }
 }

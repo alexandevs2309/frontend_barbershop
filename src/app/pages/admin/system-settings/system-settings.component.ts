@@ -14,6 +14,7 @@ import { DividerModule } from 'primeng/divider';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { SystemSettingsService, SystemSettings } from './system-settings.service';
+import { PanelModule } from 'primeng/panel';
 
 @Component({
   selector: 'app-system-settings',
@@ -31,7 +32,9 @@ import { SystemSettingsService, SystemSettings } from './system-settings.service
     DividerModule,
     ProgressSpinnerModule,
     CheckboxModule,
-    MultiSelectModule
+    MultiSelectModule,
+    PanelModule
+    
   ],
   templateUrl: './system-settings.component.html',
   styleUrl: './system-settings.component.scss',
@@ -85,10 +88,7 @@ export class SystemSettingsComponent implements OnInit {
       supported_languages: [['es', 'en'], Validators.required],
       platform_commission_rate: [5, [Validators.required, Validators.min(0), Validators.max(50)]],
       
-      // Límites por Plan
-      basic_plan_max_employees: [5, [Validators.required, Validators.min(1)]],
-      premium_plan_max_employees: [25, [Validators.required, Validators.min(1)]],
-      enterprise_plan_max_employees: [999, [Validators.required, Validators.min(1)]],
+
       
       // Integraciones Globales
       stripe_enabled: [true],

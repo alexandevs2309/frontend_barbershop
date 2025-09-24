@@ -3,7 +3,7 @@ import { Documentation } from './documentation/documentation';
 import { Crud } from './crud/crud';
 import { Empty } from './empty/empty';
 import { clientRoutes } from './client/client.routes';
-import { dashboardRoutes } from './dashboard/dashboard.routes';
+import { dashboardRoutes } from './client/dashboard.routes';
 
 export default [
     { path: 'client', children: clientRoutes },

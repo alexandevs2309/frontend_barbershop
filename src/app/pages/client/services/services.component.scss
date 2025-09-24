@@ -28,11 +28,11 @@
     .p-dialog-content {
       padding: 1.5rem;
     }
-    
+
     .field {
       margin-bottom: 1rem;
     }
-    
+
     label {
       font-weight: 600;
       margin-bottom: 0.5rem;
@@ -43,15 +43,15 @@
   .employee-list {
     max-height: 400px;
     overflow-y: auto;
-    
+
     .employee-item {
       border: 1px solid var(--surface-border);
       transition: all 0.2s;
-      
+
       &:hover {
         background: var(--surface-hover);
       }
-      
+
       &.bg-primary-50 {
         border-color: var(--primary-color);
       }
@@ -61,7 +61,7 @@
   .pricing-list {
     .pricing-item {
       border: 1px solid var(--surface-border);
-      
+
       .p-inputnumber {
         .p-inputtext {
           text-align: right;
@@ -81,18 +81,18 @@
     .card {
       padding: 1rem;
     }
-    
+
     .service-filters {
       flex-direction: column;
       gap: 0.5rem;
-      
+
       .p-inputtext,
       .p-select {
         width: 100%;
         min-width: auto;
       }
     }
-    
+
     .service-actions {
       .p-button {
         margin-bottom: 0.25rem;

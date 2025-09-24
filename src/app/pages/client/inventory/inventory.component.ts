@@ -6,7 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { SelectModule } from 'primeng/select';
+import { DropdownModule } from 'primeng/dropdown';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TagModule } from 'primeng/tag';
@@ -20,7 +20,7 @@ import { InventoryService, Product, StockMovement } from './inventory.service';
   standalone: true,
   imports: [
     CommonModule, FormsModule, TableModule, ButtonModule, DialogModule,
-    InputTextModule, InputNumberModule, SelectModule, ToastModule,
+    InputTextModule, InputNumberModule, DropdownModule, ToastModule,
     ConfirmDialogModule, TagModule, TabViewModule, CardModule
   ],
   providers: [MessageService, ConfirmationService],
@@ -103,9 +103,9 @@ import { InventoryService, Product, StockMovement } from './inventory.service';
                 <input pInputText [(ngModel)]="searchTerm" (input)="loadProducts()" 
                        placeholder="Buscar productos..." class="w-full">
               </span>
-              <p-select [options]="categoryOptions" [(ngModel)]="selectedCategory"
+              <p-dropdown [options]="categoryOptions" [(ngModel)]="selectedCategory"
                         (onChange)="loadProducts()" placeholder="Todas las categorías"
-                        [showClear]="true" class="w-12rem"></p-select>
+                        [showClear]="true" class="w-12rem"></p-dropdown>
             </div>
 
             <p-table [value]="products" [loading]="loading" [paginator]="true" [rows]="10" responsiveLayout="scroll">
@@ -223,8 +223,8 @@ import { InventoryService, Product, StockMovement } from './inventory.service';
         </div>
         <div class="field col-12 md:col-6">
           <label for="category">Categoría</label>
-          <p-select [options]="categories" [(ngModel)]="product.category" 
-                    placeholder="Seleccionar categoría" [editable]="true" class="w-full"></p-select>
+          <p-dropdown [options]="categories" [(ngModel)]="product.category" 
+                    placeholder="Seleccionar categoría" [editable]="true" class="w-full"></p-dropdown>
         </div>
         <div class="field col-12 md:col-6">
           <label for="price">Precio de Venta *</label>
@@ -266,14 +266,14 @@ import { InventoryService, Product, StockMovement } from './inventory.service';
       <div class="formgrid grid">
         <div class="field col-12">
           <label for="product">Producto *</label>
-          <p-select [options]="products" [(ngModel)]="stockMovement.product"
+          <p-dropdown [options]="products" [(ngModel)]="stockMovement.product"
                     optionLabel="name" optionValue="id" placeholder="Seleccionar producto"
-                    [filter]="true" class="w-full" required></p-select>
+                    [filter]="true" class="w-full" required></p-dropdown>
         </div>
         <div class="field col-12">
           <label for="movement_type">Tipo de Movimiento *</label>
-          <p-select [options]="movementTypes" [(ngModel)]="stockMovement.movement_type"
-                    optionLabel="label" optionValue="value" class="w-full" required></p-select>
+          <p-dropdown [options]="movementTypes" [(ngModel)]="stockMovement.movement_type"
+                    optionLabel="label" optionValue="value" class="w-full" required></p-dropdown>
         </div>
         <div class="field col-12">
           <label for="quantity">Cantidad *</label>

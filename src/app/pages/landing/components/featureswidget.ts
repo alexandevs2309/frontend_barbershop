@@ -8,8 +8,8 @@ import { CommonModule } from '@angular/common';
     template: ` <div id="features" class="py-6 px-6 lg:px-20 mt-8 mx-0 lg:mx-20">
         <div class="grid grid-cols-12 gap-4 justify-center">
             <div class="col-span-12 text-center mt-20 mb-6">
-                <div class="text-surface-900 dark:text-surface-0 font-normal mb-2 text-4xl">Marvelous Features</div>
-                <span class="text-muted-color text-2xl">Placerat in egestas erat...</span>
+                <div class="text-surface-900 dark:text-surface-0 font-normal mb-2 text-4xl">Características Poderosas</div>
+                <span class="text-muted-color text-2xl">Todo lo que necesitas para gestionar tu barbería</span>
             </div>
 
             <div class="col-span-12 md:col-span-12 lg:col-span-4 p-0 lg:pr-8 lg:pb-8 mt-6 lg:mt-0">
@@ -18,8 +18,8 @@ import { CommonModule } from '@angular/common';
                         <div class="flex items-center justify-center bg-yellow-200 mb-4" style="width: 3.5rem; height: 3.5rem; border-radius: 10px">
                             <i class="pi pi-fw pi-users !text-2xl text-yellow-700"></i>
                         </div>
-                        <h5 class="mb-2 text-surface-900 dark:text-surface-0">Easy to Use</h5>
-                        <span class="text-surface-600 dark:text-surface-200">Posuere morbi leo urna molestie.</span>
+                        <h5 class="mb-2 text-surface-900 dark:text-surface-0">Gestión de Citas</h5>
+                        <span class="text-surface-600 dark:text-surface-200">Agenda citas en línea, recordatorios automáticos y gestión de horarios.</span>
                     </div>
                 </div>
             </div>
@@ -30,8 +30,8 @@ import { CommonModule } from '@angular/common';
                         <div class="flex items-center justify-center bg-cyan-200 mb-4" style="width: 3.5rem; height: 3.5rem; border-radius: 10px">
                             <i class="pi pi-fw pi-palette !text-2xl text-cyan-700"></i>
                         </div>
-                        <h5 class="mb-2 text-surface-900 dark:text-surface-0">Fresh Design</h5>
-                        <span class="text-surface-600 dark:text-surface-200">Semper risus in hendrerit.</span>
+                        <h5 class="mb-2 text-surface-900 dark:text-surface-0">Control de Empleados</h5>
+                        <span class="text-surface-600 dark:text-surface-200">Gestiona horarios, comisiones y rendimiento de tu equipo.</span>
                     </div>
                 </div>
             </div>
@@ -42,8 +42,8 @@ import { CommonModule } from '@angular/common';
                         <div class="flex items-center justify-center bg-indigo-200" style="width: 3.5rem; height: 3.5rem; border-radius: 10px">
                             <i class="pi pi-fw pi-map !text-2xl text-indigo-700"></i>
                         </div>
-                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Well Documented</div>
-                        <span class="text-surface-600 dark:text-surface-200">Non arcu risus quis varius quam quisque.</span>
+                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Punto de Venta</div>
+                        <span class="text-surface-600 dark:text-surface-200">Sistema POS completo con inventario y gestión de ventas.</span>
                     </div>
                 </div>
             </div>
@@ -54,8 +54,8 @@ import { CommonModule } from '@angular/common';
                         <div class="flex items-center justify-center bg-slate-200 mb-4" style="width: 3.5rem; height: 3.5rem; border-radius: 10px">
                             <i class="pi pi-fw pi-id-card !text-2xl text-slate-700"></i>
                         </div>
-                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Responsive Layout</div>
-                        <span class="text-surface-600 dark:text-surface-200">Nulla malesuada pellentesque elit.</span>
+                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Reportes y Analytics</div>
+                        <span class="text-surface-600 dark:text-surface-200">Informes detallados de ventas, clientes y rendimiento.</span>
                     </div>
                 </div>
             </div>
@@ -66,8 +66,8 @@ import { CommonModule } from '@angular/common';
                         <div class="flex items-center justify-center bg-orange-200 mb-4" style="width: 3.5rem; height: 3.5rem; border-radius: 10px">
                             <i class="pi pi-fw pi-star !text-2xl text-orange-700"></i>
                         </div>
-                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Clean Code</div>
-                        <span class="text-surface-600 dark:text-surface-200">Condimentum lacinia quis vel eros.</span>
+                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Gestión de Clientes</div>
+                        <span class="text-surface-600 dark:text-surface-200">Base de datos de clientes con historial y preferencias.</span>
                     </div>
                 </div>
             </div>
@@ -78,8 +78,8 @@ import { CommonModule } from '@angular/common';
                         <div class="flex items-center justify-center bg-pink-200 mb-4" style="width: 3.5rem; height: 3.5rem; border-radius: 10px">
                             <i class="pi pi-fw pi-moon !text-2xl text-pink-700"></i>
                         </div>
-                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Dark Mode</div>
-                        <span class="text-surface-600 dark:text-surface-200">Convallis tellus id interdum velit laoreet.</span>
+                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Inventario Inteligente</div>
+                        <span class="text-surface-600 dark:text-surface-200">Control automático de stock y alertas de reposición.</span>
                     </div>
                 </div>
             </div>
@@ -90,8 +90,8 @@ import { CommonModule } from '@angular/common';
                         <div class="flex items-center justify-center bg-teal-200 mb-4" style="width: 3.5rem; height: 3.5rem; border-radius: 10px">
                             <i class="pi pi-fw pi-shopping-cart !text-2xl text-teal-700"></i>
                         </div>
-                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Ready to Use</div>
-                        <span class="text-surface-600 dark:text-surface-200">Mauris sit amet massa vitae.</span>
+                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Multi-sucursal</div>
+                        <span class="text-surface-600 dark:text-surface-200">Gestiona múltiples barberías desde un solo panel.</span>
                     </div>
                 </div>
             </div>
@@ -102,8 +102,8 @@ import { CommonModule } from '@angular/common';
                         <div class="flex items-center justify-center bg-blue-200 mb-4" style="width: 3.5rem; height: 3.5rem; border-radius: 10px">
                             <i class="pi pi-fw pi-globe !text-2xl text-blue-700"></i>
                         </div>
-                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Modern Practices</div>
-                        <span class="text-surface-600 dark:text-surface-200">Elementum nibh tellus molestie nunc non.</span>
+                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">App Móvil</div>
+                        <span class="text-surface-600 dark:text-surface-200">Accede a tu barbería desde cualquier lugar con nuestra app.</span>
                     </div>
                 </div>
             </div>
@@ -114,8 +114,8 @@ import { CommonModule } from '@angular/common';
                         <div class="flex items-center justify-center bg-purple-200 mb-4" style="width: 3.5rem; height: 3.5rem; border-radius: 10px">
                             <i class="pi pi-fw pi-eye !text-2xl text-purple-700"></i>
                         </div>
-                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Privacy</div>
-                        <span class="text-surface-600 dark:text-surface-200">Neque egestas congue quisque.</span>
+                        <div class="mt-6 mb-1 text-surface-900 dark:text-surface-0 text-xl font-semibold">Soporte 24/7</div>
+                        <span class="text-surface-600 dark:text-surface-200">Equipo de soporte siempre disponible para ayudarte.</span>
                     </div>
                 </div>
             </div>

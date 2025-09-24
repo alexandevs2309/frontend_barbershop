@@ -15,214 +15,215 @@ import { ReportsService, DashboardMetrics, SalesReport } from './reports.service
     standalone: true,
     imports: [CommonModule, FormsModule, CardModule, ButtonModule, CalendarModule, TabViewModule, TableModule, ChartModule, TagModule],
     template: `
-        <div class="grid p-3 surface-ground min-h-screen">
-            <!-- Filtros de Fecha -->
-            <div class="col-12">
-                <p-card header="Filtros" styleClass="shadow-1 surface-card border-round">
-                    <div class="formgrid grid gap-3">
-                        <div class="field col-12 sm:col-6 lg:col-3">
-                            <label for="startDate" class="block text-900 font-medium mb-2">Fecha Inicio</label>
-                            <p-calendar id="startDate" [(ngModel)]="startDate" dateFormat="yy-mm-dd" placeholder="Fecha inicio" class="w-full"> </p-calendar>
-                        </div>
-                        <div class="field col-12 sm:col-6 lg:col-3">
-                            <label for="endDate" class="block text-900 font-medium mb-2">Fecha Fin</label>
-                            <p-calendar id="endDate" [(ngModel)]="endDate" dateFormat="yy-mm-dd" placeholder="Fecha fin" class="w-full"> </p-calendar>
-                        </div>
-                        <div class="field col-12 sm:col-6 lg:col-3 flex align-items-end">
-                            <p-button label="Actualizar" icon="pi pi-refresh" (onClick)="generateReport()" class="w-full md:w-auto"> </p-button>
-                        </div>
-                    </div>
-                </p-card>
-            </div>
-
-            <!-- TabView para Reportes -->
-            <div class="col-12">
-                <p-tabView (onChange)="onTabChange($event)">
-                    <!-- Dashboard -->
-                    <p-tabPanel header="Dashboard SaaS" leftIcon="pi pi-home" [selected]="true">
-                        <ng-container *ngIf="selectedReportType === 'admin_dashboard' && dashboardData">
-                            <div class="flex flex-wrap gap-3">
-                                <div
-                                    class="flex-1 min-w-12rem"
-                                    *ngFor="
-                                        let metric of [
-                                            { icon: 'pi pi-dollar', color: 'text-primary', value: dashboardData.totals.revenue | currency: 'USD' : 'symbol' : '1.0-0', label: 'Ingresos Totales' },
-                                            { icon: 'pi pi-building', color: 'text-green-500', value: dashboardData.totals.tenants, label: 'Tenants Activos' },
-                                            { icon: 'pi pi-users', color: 'text-blue-500', value: dashboardData.totals.users, label: 'Total Usuarios' },
-                                            { icon: 'pi pi-id-card', color: 'text-orange-500', value: dashboardData.totals.subscriptions, label: 'Suscripciones Activas' }
-                                        ]
-                                    "
-                                >
-                                    <p-card class="h-full shadow-1 border-round relative overflow-hidden surface-card">
-                                        <i class="{{ metric.icon }} absolute right-3 top-3 text-5xl opacity-20 {{ metric.color }}"></i>
-                                        <div class="text-center p-3">
-                                            <div class="text-3xl font-bold {{ metric.color }}">{{ metric.value }}</div>
-                                            <div class="text-sm text-color-secondary">{{ metric.label }}</div>
-                                        </div>
-                                    </p-card>
-                                </div>
-                            </div>
-                        </ng-container>
-                    </p-tabPanel>
-
-                    <!-- Ingresos -->
-                    <p-tabPanel header="Ingresos" leftIcon="pi pi-dollar">
-                        <ng-container *ngIf="selectedReportType === 'subscription_revenue' && chartData">
-                            <div class="grid gap-0.25">
-                                <div class="col-12 lg:col-6">
-                                    <p-card header="Ingresos por Suscripciones - Últimos 12 Meses" styleClass="shadow-1 surface-card border-round h-full">
-                                        <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
-                                    </p-card>
-                                </div>
-                            </div>
-                        </ng-container>
-                    </p-tabPanel>
-
-                    <!-- Crecimiento -->
-                    <p-tabPanel header="Crecimiento" leftIcon="pi pi-chart-line">
-                        <ng-container *ngIf="selectedReportType === 'tenant_growth' && chartData">
-                            <div class="grid gap-3">
-                                <div class="col-12 lg:col-6">
-                                    <p-card header="Crecimiento de Tenants - Últimos 12 Meses" styleClass="shadow-1 surface-card border-round h-full">
-                                        <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
-                                    </p-card>
-                                </div>
-                            </div>
-                        </ng-container>
-                    </p-tabPanel>
-
-                    <!-- Churn -->
-                    <p-tabPanel header="Churn" leftIcon="pi pi-exclamation-triangle">
-                        <ng-container *ngIf="selectedReportType === 'churn_analysis' && churnData">
-                            <p-card header="Análisis de Churn" styleClass="shadow-1 surface-card border-round">
-                                <div class="flex flex-wrap gap-3 text-center">
-                                    <div class="flex-1 min-w-10rem">
-                                        <div class="text-3xl font-bold text-900">{{ churnData.total_tenants }}</div>
-                                        <div class="text-sm text-color-secondary">Total Tenants</div>
-                                    </div>
-                                    <div class="flex-1 min-w-10rem">
-                                        <div class="text-3xl font-bold text-green-500">{{ churnData.active_tenants }}</div>
-                                        <div class="text-sm text-color-secondary">Activos</div>
-                                    </div>
-                                    <div class="flex-1 min-w-10rem">
-                                        <div class="text-3xl font-bold text-red-500">{{ churnData.inactive_tenants }}</div>
-                                        <div class="text-sm text-color-secondary">Inactivos</div>
-                                    </div>
-                                    <div class="flex-1 min-w-10rem">
-                                        <div class="text-3xl font-bold text-orange-500">{{ churnData.churn_rate }}%</div>
-                                        <div class="text-sm text-color-secondary">Tasa de Churn</div>
-                                    </div>
-                                </div>
-                            </p-card>
-                        </ng-container>
-                    </p-tabPanel>
-
-                    <!-- Planes -->
-                    <p-tabPanel header="Planes" leftIcon="pi pi-tags">
-                        <ng-container *ngIf="selectedReportType === 'plan_usage' && planUsageData">
-                            <p-card header="Distribución por Plan" styleClass="shadow-1 surface-card border-round">
-                                <div class="flex flex-wrap gap-3">
-                                    <div class="flex-1 min-w-15rem" *ngFor="let plan of planUsageData.plan_usage">
-                                        <div class="flex justify-content-between align-items-center p-3 surface-border border-round">
-                                            <span class="font-semibold">{{ plan.name }}</span>
-                                            <p-tag [value]="plan.active_subscriptions + ' suscripciones'" severity="info"></p-tag>
-                                        </div>
-                                    </div>
-                                </div>
-                            </p-card>
-                        </ng-container>
-                    </p-tabPanel>
-
-                    <!-- Usuarios -->
-                    <p-tabPanel header="Usuarios" leftIcon="pi pi-users">
-                        <ng-container *ngIf="selectedReportType === 'user_activity' && userActivityData">
-                            <p-card header="Actividad de Usuarios" styleClass="shadow-1 surface-card border-round">
-                                <div class="flex flex-wrap gap-3 text-center">
-                                    <div class="flex-1 min-w-10rem">
-                                        <div class="text-3xl font-bold text-blue-500">{{ userActivityData.active_today }}</div>
-                                        <div class="text-sm text-color-secondary">Activos Hoy</div>
-                                    </div>
-                                    <div class="flex-1 min-w-10rem">
-                                        <div class="text-3xl font-bold text-green-500">{{ userActivityData.active_week }}</div>
-                                        <div class="text-sm text-color-secondary">Activos esta Semana</div>
-                                    </div>
-                                    <div class="flex-1 min-w-10rem">
-                                        <div class="text-3xl font-bold text-900">{{ userActivityData.total_users }}</div>
-                                        <div class="text-sm text-color-secondary">Total Usuarios</div>
-                                    </div>
-                                    <div class="flex-1 min-w-10rem">
-                                        <div class="text-3xl font-bold text-primary">{{ userActivityData.activity_rate }}%</div>
-                                        <div class="text-sm text-color-secondary">Tasa de Actividad</div>
-                                    </div>
-                                </div>
-                            </p-card>
-                        </ng-container>
-                    </p-tabPanel>
-                </p-tabView>
-            </div>
-
-            <!-- Sales Report -->
-            <div class="col-12" *ngIf="selectedReportType === 'sales' && salesData">
-                <div class="grid gap-3">
-                    <div class="col-12 md:col-4">
-                        <p-card header="Resumen de Ventas" styleClass="shadow-1 surface-card border-round h-full">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-primary">{{ salesData.summary.total_amount | currency: 'USD' : 'symbol' : '1.0-0' }}</div>
-                                <div class="text-sm text-color-secondary">Total Vendido</div>
-                                <div class="mt-2">
-                                    <div class="text-lg text-900">{{ salesData.summary.total_count }}</div>
-                                    <div class="text-xs text-color-secondary">Número de Ventas</div>
-                                </div>
-                            </div>
-                        </p-card>
-                    </div>
-
-                    <div class="col-12 md:col-4">
-                        <p-card header="Por Método de Pago" styleClass="shadow-1 surface-card border-round h-full">
-                            <div *ngFor="let method of salesData.by_payment_method" class="flex justify-content-between align-items-center mb-2">
-                                <span class="capitalize">{{ getPaymentMethod(method.payment_method) }}</span>
-                                <p-tag [value]="formatCurrencyForTag(method.total)" severity="info"></p-tag>
-                            </div>
-                        </p-card>
-                    </div>
-
-                    <div class="col-12 md:col-4">
-                        <p-card header="Top Empleados" styleClass="shadow-1 surface-card border-round h-full">
-                            <div *ngFor="let emp of getTopEmployees()" class="flex justify-content-between align-items-center mb-2">
-                                <span>{{ getEmployeeName(emp.user__full_name) }}</span>
-                                <p-tag [value]="formatCurrencyForTag(emp.total)" severity="success"></p-tag>
-                            </div>
-                        </p-card>
-                    </div>
-
-                    <div class="col-12" *ngIf="chartData">
-                        <p-card header="Ventas Diarias" styleClass="shadow-1 surface-card border-round h-full">
-                            <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
-                        </p-card>
-                    </div>
+       <div class="grid p-3 surface-ground min-h-screen">
+    <!-- Filtros de Fecha -->
+    <div class="col-12">
+        <p-card header="Filtros" styleClass="shadow-1 surface-card border-round">
+            <div class="formgrid grid gap-3">
+                <div class="field col-12 sm:col-6 lg:col-3">
+                    <label for="startDate" class="block text-900 font-medium mb-2">Fecha Inicio</label>
+                    <p-calendar id="startDate" [(ngModel)]="startDate" dateFormat="yy-mm-dd" placeholder="Fecha inicio" class="w-full"></p-calendar>
+                </div>
+                <div class="field col-12 sm:col-6 lg:col-3">
+                    <label for="endDate" class="block text-900 font-medium mb-2">Fecha Fin</label>
+                    <p-calendar id="endDate" [(ngModel)]="endDate" dateFormat="yy-mm-dd" placeholder="Fecha fin" class="w-full"></p-calendar>
+                </div>
+                <div class="field col-12 sm:col-6 lg:col-3 flex align-items-end justify-content-start md:justify-content-end">
+                    <p-button label="Actualizar" icon="pi pi-refresh" (onClick)="generateReport()" class="w-full md:w-auto"></p-button>
                 </div>
             </div>
+        </p-card>
+    </div>
 
-            <!-- Loading -->
-            <div class="col-12" *ngIf="loading">
-                <p-card styleClass="shadow-1 surface-card border-round">
+    <!-- TabView para Reportes -->
+    <div class="col-12">
+        <p-tabView (onChange)="onTabChange($event)">
+            <!-- Dashboard -->
+            <p-tabPanel header="Dashboard SaaS" leftIcon="pi pi-home" [selected]="true">
+                <ng-container *ngIf="selectedReportType === 'admin_dashboard' && dashboardData">
+                    <div class="grid gap-3">
+                        <div
+                            class="col-12 sm:col-6 md:col-3"
+                            *ngFor="
+                                let metric of [
+                                    { icon: 'pi pi-dollar', color: 'text-primary', value: dashboardData.totals.revenue | currency: 'USD' : 'symbol' : '1.0-0', label: 'Ingresos Totales' },
+                                    { icon: 'pi pi-building', color: 'text-green-500', value: dashboardData.totals.tenants, label: 'Tenants Activos' },
+                                    { icon: 'pi pi-users', color: 'text-blue-500', value: dashboardData.totals.users, label: 'Total Usuarios' },
+                                    { icon: 'pi pi-id-card', color: 'text-orange-500', value: dashboardData.totals.subscriptions, label: 'Suscripciones Activas' }
+                                ]
+                            "
+                        >
+                            <p-card class="h-full shadow-1 border-round relative overflow-hidden surface-card flex flex-col justify-center">
+                                <i class="{{ metric.icon }} absolute right-3 top-3 text-5xl opacity-20 {{ metric.color }}"></i>
+                                <div class="text-center p-3">
+                                    <div class="text-3xl font-bold {{ metric.color }}">{{ metric.value }}</div>
+                                    <div class="text-sm text-color-secondary">{{ metric.label }}</div>
+                                </div>
+                            </p-card>
+                        </div>
+                    </div>
+                </ng-container>
+            </p-tabPanel>
+
+            <!-- Ingresos -->
+            <p-tabPanel header="Ingresos" leftIcon="pi pi-dollar">
+                <ng-container *ngIf="selectedReportType === 'subscription_revenue' && chartData">
+                    <div class="grid gap-3">
+                        <div class="col-12">
+                            <p-card header="Ingresos por Suscripciones - Últimos 12 Meses" styleClass="shadow-1 surface-card border-round h-full">
+                                <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+                            </p-card>
+                        </div>
+                    </div>
+                </ng-container>
+            </p-tabPanel>
+
+            <!-- Crecimiento -->
+            <p-tabPanel header="Crecimiento" leftIcon="pi pi-chart-line">
+                <ng-container *ngIf="selectedReportType === 'tenant_growth' && chartData">
+                    <div class="grid gap-3">
+                        <div class="col-12">
+                            <p-card header="Crecimiento de Tenants - Últimos 12 Meses" styleClass="shadow-1 surface-card border-round h-full">
+                                <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+                            </p-card>
+                        </div>
+                    </div>
+                </ng-container>
+            </p-tabPanel>
+
+            <!-- Churn -->
+            <p-tabPanel header="Churn" leftIcon="pi pi-exclamation-triangle">
+                <ng-container *ngIf="selectedReportType === 'churn_analysis' && churnData">
+                    <p-card header="Análisis de Churn" styleClass="shadow-1 surface-card border-round">
+                        <div class="grid gap-3 text-center">
+                            <div class="col-6 md:col-3">
+                                <div class="text-3xl font-bold text-900">{{ churnData.total_tenants }}</div>
+                                <div class="text-sm text-color-secondary">Total Tenants</div>
+                            </div>
+                            <div class="col-6 md:col-3">
+                                <div class="text-3xl font-bold text-green-500">{{ churnData.active_tenants }}</div>
+                                <div class="text-sm text-color-secondary">Activos</div>
+                            </div>
+                            <div class="col-6 md:col-3">
+                                <div class="text-3xl font-bold text-red-500">{{ churnData.inactive_tenants }}</div>
+                                <div class="text-sm text-color-secondary">Inactivos</div>
+                            </div>
+                            <div class="col-6 md:col-3">
+                                <div class="text-3xl font-bold text-orange-500">{{ churnData.churn_rate }}%</div>
+                                <div class="text-sm text-color-secondary">Tasa de Churn</div>
+                            </div>
+                        </div>
+                    </p-card>
+                </ng-container>
+            </p-tabPanel>
+
+            <!-- Planes -->
+            <p-tabPanel header="Planes" leftIcon="pi pi-tags">
+                <ng-container *ngIf="selectedReportType === 'plan_usage' && planUsageData">
+                    <p-card header="Distribución por Plan" styleClass="shadow-1 surface-card border-round">
+                        <div class="grid gap-3">
+                            <div class="col-12 sm:col-6 md:col-4" *ngFor="let plan of planUsageData.plan_usage">
+                                <div class="flex justify-content-between align-items-center p-3 surface-border border-round">
+                                    <span class="font-semibold">{{ plan.name }}</span>
+                                    <p-tag [value]="plan.active_tenants + ' tenants'" severity="info"></p-tag>
+                                </div>
+                            </div>
+                        </div>
+                    </p-card>
+                </ng-container>
+            </p-tabPanel>
+
+            <!-- Usuarios -->
+            <p-tabPanel header="Usuarios" leftIcon="pi pi-users">
+                <ng-container *ngIf="selectedReportType === 'user_activity' && userActivityData">
+                    <p-card header="Actividad de Usuarios" styleClass="shadow-1 surface-card border-round">
+                        <div class="grid gap-3 text-center">
+                            <div class="col-6 md:col-3">
+                                <div class="text-3xl font-bold text-blue-500">{{ userActivityData.active_today }}</div>
+                                <div class="text-sm text-color-secondary">Activos Hoy</div>
+                            </div>
+                            <div class="col-6 md:col-3">
+                                <div class="text-3xl font-bold text-green-500">{{ userActivityData.active_week }}</div>
+                                <div class="text-sm text-color-secondary">Activos esta Semana</div>
+                            </div>
+                            <div class="col-6 md:col-3">
+                                <div class="text-3xl font-bold text-900">{{ userActivityData.total_users }}</div>
+                                <div class="text-sm text-color-secondary">Total Usuarios</div>
+                            </div>
+                            <div class="col-6 md:col-3">
+                                <div class="text-3xl font-bold text-primary">{{ userActivityData.activity_rate }}%</div>
+                                <div class="text-sm text-color-secondary">Tasa de Actividad</div>
+                            </div>
+                        </div>
+                    </p-card>
+                </ng-container>
+            </p-tabPanel>
+        </p-tabView>
+    </div>
+
+    <!-- Sales Report -->
+    <div class="col-12" *ngIf="selectedReportType === 'sales' && salesData">
+        <div class="grid gap-3">
+            <div class="col-12 md:col-4">
+                <p-card header="Resumen de Ventas" styleClass="shadow-1 surface-card border-round h-full">
                     <div class="text-center">
-                        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-                        <div class="mt-2">Generando reporte...</div>
+                        <div class="text-2xl font-bold text-primary">{{ salesData.summary.total_amount | currency: 'USD' : 'symbol' : '1.0-0' }}</div>
+                        <div class="text-sm text-color-secondary">Total Vendido</div>
+                        <div class="mt-2">
+                            <div class="text-lg text-900">{{ salesData.summary.total_count }}</div>
+                            <div class="text-xs text-color-secondary">Número de Ventas</div>
+                        </div>
                     </div>
                 </p-card>
             </div>
 
-            <!-- No Data -->
-            <div class="col-12" *ngIf="!loading && !dashboardData && !salesData && selectedReportType">
-                <p-card styleClass="shadow-1 surface-card border-round">
-                    <div class="text-center text-color-secondary">
-                        <i class="pi pi-info-circle" style="font-size: 2rem"></i>
-                        <div class="mt-2">No hay datos disponibles para el período seleccionado</div>
+            <div class="col-12 md:col-4">
+                <p-card header="Por Método de Pago" styleClass="shadow-1 surface-card border-round h-full">
+                    <div *ngFor="let method of salesData.by_payment_method" class="flex justify-content-between align-items-center mb-2">
+                        <span class="capitalize">{{ getPaymentMethod(method.payment_method) }}</span>
+                        <p-tag [value]="formatCurrencyForTag(method.total)" severity="info"></p-tag>
                     </div>
+                </p-card>
+            </div>
+
+            <div class="col-12 md:col-4">
+                <p-card header="Top Empleados" styleClass="shadow-1 surface-card border-round h-full">
+                    <div *ngFor="let emp of getTopEmployees()" class="flex justify-content-between align-items-center mb-2">
+                        <span>{{ getEmployeeName(emp.user__full_name) }}</span>
+                        <p-tag [value]="formatCurrencyForTag(emp.total)" severity="success"></p-tag>
+                    </div>
+                </p-card>
+            </div>
+
+            <div class="col-12" *ngIf="chartData">
+                <p-card header="Ventas Diarias" styleClass="shadow-1 surface-card border-round h-full">
+                    <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
                 </p-card>
             </div>
         </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="col-12" *ngIf="loading">
+        <p-card styleClass="shadow-1 surface-card border-round">
+            <div class="text-center">
+                <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                <div class="mt-2">Generando reporte...</div>
+            </div>
+        </p-card>
+    </div>
+
+    <!-- No Data -->
+    <div class="col-12" *ngIf="!loading && !dashboardData && !salesData && selectedReportType">
+        <p-card styleClass="shadow-1 surface-card border-round">
+            <div class="text-center text-color-secondary">
+                <i class="pi pi-info-circle" style="font-size: 2rem"></i>
+                <div class="mt-2">No hay datos disponibles para el período seleccionado</div>
+            </div>
+        </p-card>
+    </div>
+</div>
+
     `
 })
 export class ReportsComponent implements OnInit {

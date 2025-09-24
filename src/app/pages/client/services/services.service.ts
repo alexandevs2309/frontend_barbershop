@@ -75,7 +75,7 @@ export class ServicesService {
   }
 
   getCategories(): Observable<string[]> {
-    return this.http.get<string[]>(`${environment.apiUrl}/services/categories/`).pipe(
+    return this.http.get<string[]>(`${this.apiUrl}/categories/`).pipe(
       map(response => response || []),
       catchError(() => of(BUSINESS_CONSTANTS.DEFAULT_CATEGORIES))
     );
@@ -102,7 +102,7 @@ export class ServicesService {
       price: price
     };
 
-    return this.http.post(`${this.apiUrl}/${serviceId}/set-employee-price/`, payload).pipe(
+    return this.http.post(`${this.apiUrl}/${serviceId}/set_employee_price/`, payload).pipe(
       catchError(error => {
         console.error('Error setting employee price:', error);
         return of({ error: 'Failed to set employee price' });
@@ -112,7 +112,7 @@ export class ServicesService {
 
   // Asignar empleados a servicio
   assignEmployees(serviceId: number, employeeIds: number[]): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${serviceId}/assign-employees/`, {
+    return this.http.post(`${this.apiUrl}/${serviceId}/assign_employees/`, {
       employee_ids: employeeIds
     }).pipe(
       catchError(error => {

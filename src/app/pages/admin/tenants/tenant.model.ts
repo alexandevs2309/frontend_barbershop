@@ -6,6 +6,7 @@ export interface SubscriptionPlan {
   duration_month: number;
   is_active: boolean;
   max_employees: number;
+  max_users: number;
   features: any;
   created_at: string;
   updated_at: string;
@@ -19,9 +20,10 @@ export interface Tenant {
   contact_phone?: string;
   address?: string;
   plan_type: string; // Tipo de plan (free, basic, premium)
+  subscription_plan?: number; // ID del plan de suscripción
   subscription_plan_details?: SubscriptionPlan;
-  max_users: number;
-  max_employees: number;
+  max_users: number | null;
+  max_employees: number | null;
   is_active: boolean;
   created_at?: string;
   updated_at?: string;

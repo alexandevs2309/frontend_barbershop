@@ -46,8 +46,17 @@
         <td [class]="!tenant.is_active ? 'text-gray-500' : ''">{{ tenant.subdomain }}</td>
         <td [class]="!tenant.is_active ? 'text-gray-500' : ''">{{ tenant.contact_email }}</td>
         <td [class]="!tenant.is_active ? 'text-gray-500' : ''">{{ tenant.plan_type }}</td>
-        <td [class]="!tenant.is_active ? 'text-gray-500' : ''">{{ tenant.max_users }}</td>
-        <td [class]="!tenant.is_active ? 'text-gray-500' : ''">{{ tenant.max_employees }}</td>
+
+        <td [class]="!tenant.is_active ? 'text-gray-500' : ''">
+          <span *ngIf="tenant.max_users === 0 || tenant.max_users === null" class="text-green-500 text-4xl">∞</span>
+          <span *ngIf="tenant.max_users !== 0 && tenant.max_users !== null">{{ tenant.max_users }}</span>
+        </td>
+        
+        <td [class]="!tenant.is_active ? 'text-gray-500' : ''">
+          <span *ngIf="tenant.max_employees === 0 || tenant.max_employees === null" class="text-green-500 text-4xl">∞</span>
+          <span *ngIf="tenant.max_employees !== 0 && tenant.max_employees !== null">{{ tenant.max_employees }}</span>
+        </td>
+        
         <td>
           <p-tag
             [value]="getStatusLabel(tenant.is_active)"
@@ -191,46 +200,59 @@
     </div>
 
     <div class="field">
-      <label for="plan_type" class="block font-medium mb-2">Plan de Suscripción *</label>
+      <label for="subscription_plan" class="block font-medium mb-2">Plan de Suscripción *</label>
       <p-dropdown
-        id="plan_type"
-        [(ngModel)]="tenant.plan_type"
-        name="plan_type"
+        id="subscription_plan"
+        [(ngModel)]="tenant.subscription_plan"
+        name="subscription_plan"
         [options]="subscriptionPlans"
         optionLabel="name"
-        optionValue="name"
+        optionValue="id"
         placeholder="Selecciona un plan"
         required
         class="w-full"
-        [class]="{'ng-invalid ng-dirty': submitted && !tenant.plan_type}">
+        [class]="{'ng-invalid ng-dirty': submitted && !tenant.subscription_plan}"
+        [showClear]="true"
+        [filter]="true"
+        filterBy="description,name"
+        (onChange)="onPlanChange($event)">
+        <ng-template let-plan pTemplate="item">
+          <div class="flex flex-col">
+            <span class="font-medium">{{ plan.name | titlecase }}</span>
+            <small class="text-gray-500">{{ plan.description }} - {{ plan.price ? '$' + plan.price + '/mes' : 'Gratuito' }}</small>
+          </div>
+        </ng-template>
+        <ng-template let-plan pTemplate="selectedItem">
+          <span>{{ plan.name | titlecase }}</span>
+        </ng-template>
       </p-dropdown>
-      <small *ngIf="submitted && !tenant.plan_type" class="p-error">
+      <small *ngIf="submitted && !tenant.subscription_plan" class="p-error">
         El plan de suscripción es requerido
       </small>
     </div>
 
     <div class="field">
       <label for="max_users" class="block font-medium mb-2">Límite Máximo de Usuarios</label>
-      <p-inputNumber
+      <input
         id="max_users"
-        [(ngModel)]="tenant.max_users"
-        name="max_users"
-        [min]="1"
-        [showButtons]="true"
-        class="w-full">
-      </p-inputNumber>
+        pInputText
+        [value]="tenant.max_users === null || tenant.max_users === 0 ? '∞' : tenant.max_users"
+        readonly
+        class="w-full"
+        placeholder="Se hereda del plan seleccionado">
+      <small class="text-gray-500">Este valor se hereda automáticamente del plan seleccionado</small>
     </div>
 
     <div class="field">
       <label for="max_employees" class="block font-medium mb-2">Límite Máximo de Empleados</label>
-      <p-inputNumber
+      <input
         id="max_employees"
-        [(ngModel)]="tenant.max_employees"
-        name="max_employees"
-        [min]="1"
-        [showButtons]="true"
-        class="w-full">
-      </p-inputNumber>
+        pInputText
+        [value]="tenant.max_employees === null || tenant.max_employees === 0 ? '∞' : tenant.max_employees"
+        readonly
+        class="w-full"
+        placeholder="Se hereda del plan seleccionado">
+      <small class="text-gray-500">Este valor se hereda automáticamente del plan seleccionado</small>
     </div>
 
     <div class="field">

@@ -1,5 +1,5 @@
-   <div class="card">
-  <h5 class="font-semibold">Auditoría del sistema</h5>
+<div class="card">
+  <h5 class="font-semibold mb-3">Auditoría del Sistema</h5>
 
   <p-table
     #dt
@@ -10,59 +10,90 @@
     [globalFilterFields]="['user','action','model_name']"
     [rowsPerPageOptions]="[10,20,50]"
     [responsiveLayout]="'scroll'"
-    [filterDelay]="300">
+    [filterDelay]="300"
+    [rowHover]="true"
+    dataKey="id">
 
+    <!-- Filtro global -->
     <ng-template pTemplate="caption">
-      <div class="flex justify-content-between align-items-center">
-        <h6>Historial de cambios</h6>
-        <span class="p-input-icon-left ml-5">
-          
-          <input pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Buscar..."  />
+      <div class="flex flex-col md:flex-row md:justify-content-between md:align-items-center gap-3">
+        <h6 class="m-0">Historial de cambios</h6>
+        <span class="p-input-icon-left w-full md:w-20rem">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="onGlobalFilter($event)"
+            placeholder="Buscar..."
+            class="w-full"
+            aria-label="Buscar registros de auditoría" />
         </span>
       </div>
     </ng-template>
 
+    <!-- Cabecera -->
     <ng-template pTemplate="header">
       <tr>
-        <th pSortableColumn="user">Usuario <p-sortIcon field="user"></p-sortIcon></th>
-        <th pSortableColumn="action">Acción <p-sortIcon field="action"></p-sortIcon></th>
-        <th pSortableColumn="source">Origen <p-sortIcon field="source"></p-sortIcon></th>
-        <th>Modelo</th>
-        <th>ID Objeto</th>
-        <th pSortableColumn="timestamp">Fecha <p-sortIcon field="timestamp"></p-sortIcon></th>
-        <th>Detalles</th>
+        <th pSortableColumn="user" style="min-width: 10rem;">Usuario <p-sortIcon field="user"></p-sortIcon></th>
+        <th pSortableColumn="action" style="min-width: 8rem;">Acción <p-sortIcon field="action"></p-sortIcon></th>
+        <th pSortableColumn="source" style="min-width: 8rem;">Origen <p-sortIcon field="source"></p-sortIcon></th>
+        <th style="min-width: 10rem;">Modelo</th>
+        <th style="min-width: 6rem;">ID Objeto</th>
+        <th pSortableColumn="timestamp" style="min-width: 12rem;">Fecha <p-sortIcon field="timestamp"></p-sortIcon></th>
+        <th style="min-width: 6rem;">Detalles</th>
       </tr>
     </ng-template>
 
+    <!-- Cuerpo -->
     <ng-template pTemplate="body" let-log>
       <tr>
         <td>{{ log.user?.email || 'Sistema' }}</td>
-        <td><p-tag [value]="getActionLabel(log.action)" [severity]="getSeverity(log.action)"></p-tag></td>
+        <td>
+          <p-tag
+            [value]="getActionLabel(log.action)"
+            [severity]="getSeverity(log.action)"
+            class="font-semibold">
+          </p-tag>
+        </td>
         <td>{{ getSourceLabel(log.source) }}</td>
         <td>{{ log.content_type_name || '-' }}</td>
         <td>{{ log.object_id || '-' }}</td>
         <td>{{ log.timestamp | date:'short' }}</td>
         <td>
-          <button pButton pRipple icon="pi pi-eye" label="Ver" class="p-button-text p-button-sm"
-            (click)="showDetails(log)">
+          <button
+            pButton
+            pRipple
+            icon="pi pi-eye"
+            label="Ver"
+            class="p-button-text p-button-sm"
+            (click)="showDetails(log)"
+            aria-label="Ver detalles del registro">
           </button>
         </td>
       </tr>
     </ng-template>
 
+    <!-- Mensaje vacío -->
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="6">No se encontraron registros</td>
+        <td colspan="7" class="text-center p-4">
+          <i class="pi pi-info-circle text-4xl text-gray-400 mb-2"></i>
+          <p class="m-0 text-gray-600">No se encontraron registros de auditoría</p>
+        </td>
       </tr>
     </ng-template>
   </p-table>
 </div>
 
+<!-- Dialog de detalles -->
 <p-dialog
   header="Detalles del cambio"
   [(visible)]="displayDetails"
   [modal]="true"
-  [style]="{width: '40vw'}"
-  [dismissableMask]="true">
-  <pre>{{ selectedLog?.changes | json }}</pre>
+  [style]="{ width: '50vw', maxHeight: '70vh', overflow: 'auto' }"
+  [dismissableMask]="true"
+  [maximizable]="true">
+  <pre class="m-0 p-2 bg-gray-100 dark:bg-gray-800 rounded">
+{{ selectedLog?.changes | json }}
+  </pre>
 </p-dialog>

@@ -179,6 +179,82 @@ import { sanitizeForLog } from '../../../shared/utils/error.util';
   </ng-template>
 </p-dialog>
 
+<!-- Dialog Gestionar Servicios -->
+<p-dialog [(visible)]="servicesDialog" [modal]="true" [style]="{width: '600px'}"
+          header="Gestionar Servicios" [closable]="true">
+  <div *ngIf="selectedEmployeeForServices">
+    <h4>{{ selectedEmployeeForServices.user }}</h4>
+    <p class="text-muted mb-4">Selecciona los servicios que puede realizar este empleado</p>
+
+    <div class="service-list">
+      <div class="service-item flex align-items-center justify-content-between p-3 border-round mb-2"
+           *ngFor="let service of availableServices"
+           [class.bg-primary-50]="isServiceAssigned(service.id)">
+        <div class="flex align-items-center gap-3">
+          <input type="checkbox"
+                 [checked]="isServiceAssigned(service.id)"
+                 (change)="toggleServiceAssignment(service.id, $event)">
+          <div>
+            <div class="font-semibold">{{ service.name }}</div>
+            <div class="text-sm text-600">{{ service.category || 'Sin categoría' }} - {{ service.price | currency:'USD' }}</div>
+          </div>
+        </div>
+        <div *ngIf="isServiceAssigned(service.id)" class="text-sm text-primary">
+          <i class="pi pi-check"></i> Asignado
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!availableServices.length" class="text-center p-4">
+      <i class="pi pi-cog text-4xl text-300 mb-2 block"></i>
+      <p class="text-600">No hay servicios disponibles</p>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end gap-2">
+      <p-button label="Cancelar" (click)="servicesDialog = false" styleClass="p-button-text"></p-button>
+      <p-button label="Guardar" (click)="saveEmployeeServices()" [loading]="savingServices"></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Dialog Gestionar Horarios -->
+<p-dialog [(visible)]="scheduleDialog" [modal]="true" [style]="{width: '700px'}"
+          header="Gestionar Horarios" [closable]="true">
+  <div *ngIf="selectedEmployeeForSchedule">
+    <h4>{{ selectedEmployeeForSchedule.user }}</h4>
+    <p class="text-muted mb-4">Configura los horarios de trabajo del empleado</p>
+
+    <div class="schedule-list">
+      <div class="schedule-item p-3 border-round mb-3 surface-card"
+           *ngFor="let schedule of employeeSchedules">
+        <div class="flex align-items-center justify-content-between">
+          <div class="flex align-items-center gap-3">
+            <input type="checkbox" [(ngModel)]="schedule.enabled">
+            <div class="font-semibold w-6rem">{{ getDayLabel(schedule.day_of_week) }}</div>
+          </div>
+          <div class="flex align-items-center gap-2" *ngIf="schedule.enabled">
+            <input type="time" [(ngModel)]="schedule.start_time" class="p-2 border-round border-1 border-300">
+            <span>a</span>
+            <input type="time" [(ngModel)]="schedule.end_time" class="p-2 border-round border-1 border-300">
+          </div>
+          <div *ngIf="!schedule.enabled" class="text-sm text-500">
+            No disponible
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end gap-2">
+      <p-button label="Cancelar" (click)="scheduleDialog = false" styleClass="p-button-text"></p-button>
+      <p-button label="Guardar" (click)="saveEmployeeSchedule()" [loading]="savingSchedule"></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
@@ -194,6 +270,29 @@ export class EmployeesComponent implements OnInit {
   saving = false;
   showUserInfoDialog = false;
   usersWithoutTenant: any[] = [];
+  
+  // Gestión de servicios
+  servicesDialog = false;
+  availableServices: any[] = [];
+  employeeServices: any[] = [];
+  selectedEmployeeForServices: any = null;
+  savingServices = false;
+  
+  // Gestión de horarios
+  scheduleDialog = false;
+  employeeSchedules: any[] = [];
+  selectedEmployeeForSchedule: any = null;
+  savingSchedule = false;
+  
+  daysOfWeek = [
+    { label: 'Lunes', value: 'monday' },
+    { label: 'Martes', value: 'tuesday' },
+    { label: 'Miércoles', value: 'wednesday' },
+    { label: 'Jueves', value: 'thursday' },
+    { label: 'Viernes', value: 'friday' },
+    { label: 'Sábado', value: 'saturday' },
+    { label: 'Domingo', value: 'sunday' }
+  ];
 
   constructor(
     private employeesService: EmployeesService,
@@ -204,6 +303,7 @@ export class EmployeesComponent implements OnInit {
   ngOnInit() {
     this.loadEmployees();
     this.loadAvailableUsers();
+    this.loadAvailableServices();
   }
 
   loadEmployees() {
@@ -357,20 +457,155 @@ export class EmployeesComponent implements OnInit {
     });
   }
 
+  loadAvailableServices() {
+    // Cargar servicios disponibles desde el API
+    this.employeesService.getAvailableServices().subscribe({
+      next: (services) => {
+        this.availableServices = services;
+      },
+      error: (error) => {
+        console.error('Error loading services:', error);
+      }
+    });
+  }
+
   manageServices(employee: any) {
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Próximamente',
-      detail: 'Gestión de servicios en desarrollo'
+    this.selectedEmployeeForServices = employee;
+    this.loadEmployeeServices(employee.id);
+    this.servicesDialog = true;
+  }
+
+  loadEmployeeServices(employeeId: number) {
+    this.employeesService.getEmployeeServices(employeeId).subscribe({
+      next: (services) => {
+        this.employeeServices = services;
+      },
+      error: (error) => {
+        console.error('Error loading employee services:', error);
+        this.employeeServices = [];
+      }
+    });
+  }
+
+  isServiceAssigned(serviceId: number): boolean {
+    return this.employeeServices.some(es => es.service.id === serviceId);
+  }
+
+  toggleServiceAssignment(serviceId: number, event: any) {
+    if (event.target.checked) {
+      const service = this.availableServices.find(s => s.id === serviceId);
+      if (service && !this.isServiceAssigned(serviceId)) {
+        this.employeeServices.push({ service });
+      }
+    } else {
+      this.employeeServices = this.employeeServices.filter(es => es.service.id !== serviceId);
+    }
+  }
+
+  saveEmployeeServices() {
+    if (!this.selectedEmployeeForServices) return;
+
+    const serviceIds = this.employeeServices.map(es => es.service.id);
+    this.savingServices = true;
+
+    this.employeesService.assignServices(this.selectedEmployeeForServices.id, serviceIds).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: 'Servicios asignados correctamente'
+        });
+        this.servicesDialog = false;
+        this.savingServices = false;
+      },
+      error: (error) => {
+        console.error('Error saving services:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al asignar servicios'
+        });
+        this.savingServices = false;
+      }
     });
   }
 
   manageSchedule(employee: any) {
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Próximamente',
-      detail: 'Gestión de horarios en desarrollo'
+    this.selectedEmployeeForSchedule = employee;
+    this.loadEmployeeSchedule(employee.id);
+    this.scheduleDialog = true;
+  }
+
+  loadEmployeeSchedule(employeeId: number) {
+    this.employeesService.getEmployeeSchedule(employeeId).subscribe({
+      next: (schedules) => {
+        this.employeeSchedules = schedules;
+        // Inicializar horarios vacíos si no existen
+        this.daysOfWeek.forEach(day => {
+          if (!this.employeeSchedules.find(s => s.day_of_week === day.value)) {
+            this.employeeSchedules.push({
+              day_of_week: day.value,
+              start_time: '',
+              end_time: '',
+              enabled: false
+            });
+          } else {
+            const schedule = this.employeeSchedules.find(s => s.day_of_week === day.value);
+            if (schedule) schedule.enabled = true;
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error loading schedule:', error);
+        // Inicializar horarios vacíos
+        this.employeeSchedules = this.daysOfWeek.map(day => ({
+          day_of_week: day.value,
+          start_time: '09:00',
+          end_time: '18:00',
+          enabled: false
+        }));
+      }
     });
+  }
+
+  saveEmployeeSchedule() {
+    if (!this.selectedEmployeeForSchedule) return;
+
+    const schedules = this.employeeSchedules
+      .filter(s => s.enabled && s.start_time && s.end_time)
+      .map(s => ({
+        day_of_week: s.day_of_week,
+        start_time: s.start_time,
+        end_time: s.end_time
+      }));
+
+    this.savingSchedule = true;
+
+    this.employeesService.setSchedule(this.selectedEmployeeForSchedule.id, schedules).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: 'Horarios guardados correctamente'
+        });
+        this.scheduleDialog = false;
+        this.savingSchedule = false;
+      },
+      error: (error) => {
+        console.error('Error saving schedule:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al guardar horarios'
+        });
+        this.savingSchedule = false;
+      }
+    });
+  }
+
+  getDayLabel(dayValue: string): string {
+    const day = this.daysOfWeek.find(d => d.value === dayValue);
+    return day ? day.label : dayValue;
   }
 
   showUserManagement() {

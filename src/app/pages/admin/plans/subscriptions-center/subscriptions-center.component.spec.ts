@@ -1,18 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { SubscriptionsCenterComponent } from './subscriptions-center.component';
+import { SubscriptionCenterComponent } from './subscriptions-center.component';
 
-describe('SubscriptionsCenterComponent', () => {
-  let component: SubscriptionsCenterComponent;
-  let fixture: ComponentFixture<SubscriptionsCenterComponent>;
+describe('SubscriptionCenterComponent', () => {
+  let component: SubscriptionCenterComponent;
+  let fixture: ComponentFixture<SubscriptionCenterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SubscriptionsCenterComponent]
+      imports: [SubscriptionCenterComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(SubscriptionsCenterComponent);
+    fixture = TestBed.createComponent(SubscriptionCenterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

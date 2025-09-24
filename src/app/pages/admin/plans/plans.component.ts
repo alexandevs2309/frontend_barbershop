@@ -49,8 +49,8 @@ import { Toast } from 'primeng/toast';
                         <td>{{ plan.description }}</td>
 
                         <td>
-                            <span *ngIf="plan.employeesLimit !== null">{{ plan.employeesLimit }}</span>
-                            <span *ngIf="plan.employeesLimit === null" pTooltip="Ilimitado" class="text-green-500 text-4xl">∞</span>
+                            <span *ngIf="plan.max_employees !== null && plan.max_employees !== 0">{{ plan.max_employees }}</span>
+                            <span *ngIf="plan.max_employees === null || plan.max_employees === 0" pTooltip="Ilimitado" class="text-green-500 text-4xl">∞</span>
                         </td>
                         <td>
                             <ul class="m-0 pl-3">

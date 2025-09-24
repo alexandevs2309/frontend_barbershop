@@ -5,7 +5,7 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { CalendarModule } from 'primeng/calendar';
-import { SelectModule } from 'primeng/select';
+import { DropdownModule } from 'primeng/dropdown';
 import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
@@ -19,7 +19,7 @@ import { EmployeesService } from '../employees/employees.service';
   standalone: true,
   imports: [
     CommonModule, FormsModule, TableModule, ButtonModule, DialogModule,
-    CalendarModule, SelectModule, ToastModule, TagModule, CardModule, ChartModule
+    CalendarModule, DropdownModule, ToastModule, TagModule, CardModule, ChartModule
   ],
   providers: [MessageService],
   styleUrl: './earnings.component.scss',
@@ -104,10 +104,10 @@ import { EmployeesService } from '../employees/employees.service';
           <div class="formgrid grid">
             <div class="field col-12 md:col-4">
               <label for="employee">Empleado</label>
-              <p-select [options]="employees" [(ngModel)]="selectedEmployee"
+              <p-dropdown [options]="employees" [(ngModel)]="selectedEmployee"
                         optionLabel="user" optionValue="id" placeholder="Todos los empleados"
                         (onChange)="filterEarnings()" class="w-full">
-              </p-select>
+              </p-dropdown>
             </div>
             <div class="field col-12 md:col-4">
               <label for="startDate">Fecha Inicio</label>
@@ -207,9 +207,9 @@ import { EmployeesService } from '../employees/employees.service';
       <div class="formgrid grid">
         <div class="field col-12">
           <label for="employee">Empleado *</label>
-          <p-select [options]="employees" [(ngModel)]="generateForm.employee"
+          <p-dropdown [options]="employees" [(ngModel)]="generateForm.employee"
                     optionLabel="user" optionValue="id" placeholder="Seleccionar empleado"
-                    class="w-full"></p-select>
+                    class="w-full"></p-dropdown>
         </div>
         <div class="field col-12">
           <label for="startDate">Fecha Inicio *</label>

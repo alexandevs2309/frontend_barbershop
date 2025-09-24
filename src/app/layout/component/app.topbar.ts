@@ -41,6 +41,23 @@ import { Router } from '@angular/router';
         </div>
 
         <div class="layout-topbar-actions">
+          <!-- User Welcome Message Mejorado con estilo moderno -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-4 p-2 md:p-0">
+            <span class="text-gray-900 dark:text-gray-100 font-medium text-sm md:text-base">
+                Bienvenido, {{ getCurrentUserName() }}:
+            </span>
+            <span
+                class="px-3 py-1 rounded-lg font-semibold text-sm md:text-base
+                    bg-gradient-to-r from-blue-500 to-indigo-500
+                    text-white shadow-md
+                    transition-transform transform hover:scale-105 hover:shadow-xl
+                    duration-300 ease-in-out"
+            >
+                {{ getCurrentUserRole() }}
+            </span>
+            </div>
+
+
             <div class="layout-config-menu">
                 <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
                     <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
@@ -158,5 +175,18 @@ export class AppTopbar {
     logout() {
         this.authService.logout();
         this.router.navigate(['auth/login']);
+    }
+
+    getCurrentUserName(): string {
+        const user = this.authService.getCurrentUser();
+        return user?.full_name || user?.email || 'Usuario';
+    }
+
+    getCurrentUserRole(): string {
+        const user = this.authService.getCurrentUser();
+        if (user?.roles && user.roles.length > 0) {
+            return user.roles[0].name;
+        }
+        return 'Sin rol';
     }
 }

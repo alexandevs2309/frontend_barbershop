@@ -61,12 +61,16 @@ export class TenantsComponent implements OnInit {
   }
 
   loadSubscriptionPlans() {
-    this.http.get<SubscriptionPlan[]>(`${environment.apiUrl}/subscriptions/plans/`).subscribe({
-      next: (plans) => {
-        this.subscriptionPlans = plans;
+    this.http.get<any>(`${environment.apiUrl}/subscriptions/plans/`).subscribe({
+      next: (response) => {
+        console.log('Raw subscription plans response:', response);
+        this.subscriptionPlans = Array.isArray(response) ? response : (response.results || []);
+        console.log('Processed subscription plans:', this.subscriptionPlans);
+        console.log('Number of plans:', this.subscriptionPlans.length);
       },
       error: (error) => {
         console.error('Error loading subscription plans:', error);
+        this.subscriptionPlans = [];
       }
     });
   }
@@ -84,6 +88,17 @@ export class TenantsComponent implements OnInit {
         this.tenants = Array.isArray(data) ? data : [];
         console.log('Tenants assigned:', this.tenants);
         console.log('Number of tenants:', this.tenants.length);
+
+        // Debug subscription plan data for each tenant
+        this.tenants.forEach((tenant, index) => {
+          console.log(`Tenant ${index + 1}:`, {
+            id: tenant.id,
+            name: tenant.name,
+            plan_type: tenant.plan_type,
+            subscription_plan: tenant.subscription_plan,
+            subscription_plan_details: tenant.subscription_plan_details
+          });
+        });
 
         this.loading = false;
       },
@@ -109,7 +124,7 @@ export class TenantsComponent implements OnInit {
       contact_email: '',
       contact_phone: '',
       address: '',
-      plan_type: 'free',
+      subscription_plan: undefined,
       max_users: 1,
       max_employees: 1,
       is_active: true
@@ -119,7 +134,21 @@ export class TenantsComponent implements OnInit {
   }
 
   editTenant(tenant: Tenant) {
-    this.tenant = { ...tenant };
+    // Buscar los detalles del plan en la lista de planes disponibles
+    const planDetails = this.subscriptionPlans.find(plan => plan.id === tenant.subscription_plan);
+
+    // Copiar todos los campos del tenant
+    this.tenant = {
+      ...tenant,
+      // Asegurar que subscription_plan sea el ID correcto para el dropdown
+      subscription_plan: tenant.subscription_plan || undefined
+    };
+
+    console.log('Editing tenant:', tenant);
+    console.log('Form data after copy:', this.tenant);
+    console.log('Subscription plan ID:', this.tenant.subscription_plan);
+    console.log('Plan details found:', planDetails);
+
     this.tenantDialog = true;
   }
 
@@ -159,11 +188,29 @@ export class TenantsComponent implements OnInit {
   saveTenant() {
     this.submitted = true;
 
-    if (this.tenant.name?.trim() && this.tenant.subdomain?.trim() && this.tenant.contact_email?.trim()) {
+    if (this.tenant.name?.trim() && this.tenant.subdomain?.trim()) {
+      // Preparar los datos para enviar al backend
+      const tenantData = {
+        name: this.tenant.name,
+        subdomain: this.tenant.subdomain,
+        contact_email: this.tenant.contact_email,
+        contact_phone: this.tenant.contact_phone,
+        address: this.tenant.address,
+        subscription_plan: this.tenant.subscription_plan, // ID del plan de suscripción
+        max_users: this.tenant.max_users || 1,
+        max_employees: this.tenant.max_employees || 1,
+        is_active: this.tenant.is_active !== undefined ? this.tenant.is_active : true
+      };
+
+      console.log('Sending tenant data:', tenantData);
+      console.log('Tenant ID for update:', this.tenant.id);
+
       if (this.tenant.id) {
         // Actualizar tenant existente
-        this.tenantsService.updateTenant(this.tenant.id, this.tenant).subscribe({
+        console.log('Updating tenant with data:', tenantData);
+        this.tenantsService.updateTenant(this.tenant.id, tenantData).subscribe({
           next: (updatedTenant) => {
+            console.log('Tenant updated successfully:', updatedTenant);
             const index = this.tenants.findIndex(t => t.id === updatedTenant.id);
             if (index !== -1) {
               this.tenants[index] = updatedTenant;
@@ -178,17 +225,19 @@ export class TenantsComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error updating tenant:', error);
+            console.error('Error response:', error.error);
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'Error al actualizar el tenant'
+              detail: 'Error al actualizar el tenant: ' + (error.error?.detail || error.message || 'Error desconocido')
             });
           }
         });
       } else {
         // Crear nuevo tenant
-        this.tenantsService.createTenant(this.tenant as any).subscribe({
+        this.tenantsService.createTenant(tenantData as any).subscribe({
           next: (newTenant) => {
+            console.log('Tenant created successfully:', newTenant);
             this.tenants.push(newTenant);
             this.messageService.add({
               severity: 'success',
@@ -203,7 +252,7 @@ export class TenantsComponent implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'Error al crear el tenant'
+              detail: 'Error al crear el tenant: ' + (error.error?.detail || error.message || 'Error desconocido')
             });
           }
         });
@@ -217,6 +266,20 @@ export class TenantsComponent implements OnInit {
 
   getStatusLabel(status: boolean): string {
     return status ? 'Activo' : 'Inactivo';
+  }
+
+  getPlanDisplayName(tenant: Tenant): string {
+    if (!tenant.subscription_plan) {
+      return tenant.plan_type || 'Sin plan';
+    }
+
+    // Buscar el plan en la lista de planes disponibles
+    const plan = this.subscriptionPlans.find(p => p.id === tenant.subscription_plan);
+    if (plan) {
+      return plan.description || plan.name || `Plan ${tenant.subscription_plan}`;
+    }
+
+    return `Plan ${tenant.subscription_plan}`;
   }
 
   activateTenant(tenant: Tenant) {
@@ -287,5 +350,32 @@ export class TenantsComponent implements OnInit {
         });
       }
     });
+  }
+
+  onPlanChange(event: any) {
+    const selectedPlanId = event.value;
+    const selectedPlan = this.subscriptionPlans.find(p => p.id === selectedPlanId);
+
+    if (selectedPlan) {
+      // Heredar TODAS las características del plan desde la BD
+      if (selectedPlan.max_employees === 0) {
+        this.tenant.max_employees = null; // Ilimitado
+      } else {
+        this.tenant.max_employees = selectedPlan.max_employees;
+      }
+
+      if (selectedPlan.max_users === 0) {
+        this.tenant.max_users = null; // Ilimitado
+      } else {
+        this.tenant.max_users = selectedPlan.max_users;
+      }
+
+      console.log(`Plan ${selectedPlan.name} heredado desde BD:`);
+      console.log(`- Max Employees: ${selectedPlan.max_employees}`);
+      console.log(`- Max Users: ${selectedPlan.max_users}`);
+      console.log(`- Duration: ${selectedPlan.duration_month} meses`);
+      console.log(`- Price: $${selectedPlan.price}`);
+      console.log(`- Features:`, selectedPlan.features);
+    }
   }
 }

@@ -19,32 +19,35 @@ import { UserFormComponent } from './user-form.component';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { ConfirmDialog } from 'primeng/confirmdialog';
-
+import { ToolbarModule } from 'primeng/toolbar';
 import { Subject, debounceTime, takeUntil } from 'rxjs';
 
 import { LazyLoadEvent } from 'primeng/api';
 
 @Component({
     selector: 'app-users',
-    imports: [CommonModule, FormsModule, BadgeModule, ButtonModule, Card, TableModule, TagModule, TooltipModule, InputTextModule, DialogModule, UserFormComponent, Toast, ConfirmDialog],
+    imports: [CommonModule, FormsModule, BadgeModule, ButtonModule, Card, TableModule, TagModule, TooltipModule, InputTextModule, DialogModule, UserFormComponent, Toast, ConfirmDialog, ToolbarModule],
     providers: [UsersService, ConfirmationService, MessageService],
-    template: `
+
+
+   template: `
         <p-card header="Gestión de Usuarios">
             <!-- SOLO búsqueda por texto + Export -->
-            <div class="flex flex-column md:flex-row align-items-center justify-content-between mb-3">
-                <div class="flex flex-wrap align-items-center mb-2 md:mb-0">
-                    <button pButton label="Nuevo Usuario" icon="pi pi-plus" class="p-button-success mr-2 mb-2 md:mb-0" (click)="openNewUserForm()"></button>
-                    <button pButton label="Ver Eliminados" icon="pi pi-trash" class="p-button-secondary mr-2 mb-2 md:mb-0" (click)="showDeletedUsers()"></button>
-                </div>
-                
-                <div class="flex flex-wrap align-items-center">
-                    <span class="p-input-icon-left mr-2 mb-2 md:mb-0">
-                        <i class="pi pi-search"></i>
-                        <input pInputText type="text" placeholder="Buscar (nombre o email)" [(ngModel)]="search" (input)="onSearchInput()" class="w-full" style="min-width: 260px" />
-                    </span>
-                    <button pButton label="Exportar CSV" icon="pi pi-download" class="mb-2 md:mb-0" (click)="exportCsv()"></button>
-                </div>
-            </div>
+<p-toolbar class="mb-3">
+  <div class="p-toolbar-group-left">
+    <button pButton label="Nuevo Usuario" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNewUserForm()"></button>
+    <button pButton label="Ver Eliminados" icon="pi pi-trash" class="p-button-secondary" (click)="showDeletedUsers()"></button>
+  </div>
+
+  <div class="p-toolbar-group-right flex gap-2">
+    <span class="p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input pInputText type="text" placeholder="Buscar (nombre o email)" [(ngModel)]="search" (input)="onSearchInput()" class="w-72" />
+    </span>
+    <button pButton label="Exportar CSV" icon="pi pi-download" class="p-button-outlined" (click)="exportCsv()"></button>
+  </div>
+</p-toolbar>
+
 
             <p-table
                 [value]="users"
@@ -277,7 +280,7 @@ export class UsersComponent {
         const cleanParams = Object.fromEntries(
             Object.entries(params).filter(([_, value]) => value !== undefined)
         );
-        
+
         this.usersService.getUsers(Object.keys(cleanParams).length > 0 ? cleanParams : undefined).subscribe({
             next: (res: any) => {
                 this.users = res.results ?? res;
@@ -356,18 +359,18 @@ export class UsersComponent {
                     next: () => {
                         this.users = this.users.filter(u => u.id !== user.id);
                         this.total--;
-                        this.messageService.add({ 
-                            severity: 'success', 
-                            summary: 'Usuario eliminado', 
-                            detail: `${user.full_name} ha sido eliminado correctamente` 
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Usuario eliminado',
+                            detail: `${user.full_name} ha sido eliminado correctamente`
                         });
                     },
                     error: (err) => {
                         console.error('Error eliminando usuario:', err);
-                        this.messageService.add({ 
-                            severity: 'error', 
-                            summary: 'Error', 
-                            detail: 'No se pudo eliminar el usuario' 
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'No se pudo eliminar el usuario'
                         });
                     }
                 });

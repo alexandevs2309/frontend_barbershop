@@ -10,6 +10,7 @@ import { FeaturesWidget } from './components/featureswidget';
 import { HighlightsWidget } from './components/highlightswidget';
 import { PricingWidget } from './components/pricingwidget';
 import { FooterWidget } from './components/footerwidget';
+import { LayoutService } from '../../layout/service/layout.service';
 
 @Component({
     selector: 'app-landing',
@@ -28,4 +29,9 @@ import { FooterWidget } from './components/footerwidget';
         </div>
     `
 })
-export class Landing {}
+export class Landing {
+    constructor(public layoutService: LayoutService) {
+        // Aplica el modo oscuro al cargar el componente
+        this.layoutService.toggleDarkMode();
+    }
+}

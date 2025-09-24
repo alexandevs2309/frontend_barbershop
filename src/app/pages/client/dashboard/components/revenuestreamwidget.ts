@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ChartModule } from 'primeng/chart';
 import { debounceTime, Subscription } from 'rxjs';
-import { LayoutService } from '../../../../../layout/service/layout.service';
+import { LayoutService } from '../../../../layout/service/layout.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environment';
 
 @Component({
     standalone: true,
@@ -12,51 +14,80 @@ import { LayoutService } from '../../../../../layout/service/layout.service';
         <p-chart type="bar" [data]="chartData" [options]="chartOptions" class="h-80" />
     </div>`
 })
-export class RevenueStreamWidget {
+export class RevenueStreamWidget implements OnInit, OnDestroy {
     chartData: any;
-
     chartOptions: any;
-
     subscription!: Subscription;
 
-    constructor(public layoutService: LayoutService) {
+    constructor(public layoutService: LayoutService, private http: HttpClient) {
         this.subscription = this.layoutService.configUpdate$.pipe(debounceTime(25)).subscribe(() => {
             this.initChart();
         });
     }
 
     ngOnInit() {
-        this.initChart();
+        this.loadRevenueData();
+    }
+
+    loadRevenueData() {
+        this.http.get(`${environment.apiUrl}/reports/?type=sales`).subscribe({
+            next: (data: any) => {
+                const dailySales = data.daily_sales || [];
+                this.processRevenueData(dailySales);
+            },
+            error: () => {
+                this.initChart(); // Fallback a datos estáticos
+            }
+        });
+    }
+
+    processRevenueData(dailySales: any[]) {
+        // Agrupar por semanas del mes actual
+        const weeks = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
+        const weeklyData = [0, 0, 0, 0];
+        
+        dailySales.forEach(sale => {
+            const date = new Date(sale.day);
+            const dayOfMonth = date.getDate();
+            const weekIndex = Math.min(Math.floor((dayOfMonth - 1) / 7), 3);
+            weeklyData[weekIndex] += parseFloat(sale.total || 0);
+        });
+        
+        this.initChartWithData(weeks, weeklyData);
     }
 
     initChart() {
+        this.initChartWithData(['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'], [0, 0, 0, 0]);
+    }
+
+    initChartWithData(labels: string[], revenueData: number[]) {
         const documentStyle = getComputedStyle(document.documentElement);
         const textColor = documentStyle.getPropertyValue('--text-color');
         const borderColor = documentStyle.getPropertyValue('--surface-border');
         const textMutedColor = documentStyle.getPropertyValue('--text-color-secondary');
 
         this.chartData = {
-            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            labels: labels,
             datasets: [
                 {
                     type: 'bar',
-                    label: 'Subscriptions',
+                    label: 'Servicios',
                     backgroundColor: documentStyle.getPropertyValue('--p-primary-400'),
-                    data: [4000, 10000, 15000, 4000],
+                    data: revenueData.map(val => val * 0.7), // 70% servicios
                     barThickness: 32
                 },
                 {
                     type: 'bar',
-                    label: 'Advertising',
+                    label: 'Productos',
                     backgroundColor: documentStyle.getPropertyValue('--p-primary-300'),
-                    data: [2100, 8400, 2400, 7500],
+                    data: revenueData.map(val => val * 0.3), // 30% productos
                     barThickness: 32
                 },
                 {
                     type: 'bar',
-                    label: 'Affiliate',
+                    label: 'Total',
                     backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
-                    data: [4100, 5200, 3400, 7400],
+                    data: revenueData,
                     borderRadius: {
                         topLeft: 8,
                         topRight: 8,

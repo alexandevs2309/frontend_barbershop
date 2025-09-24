@@ -10,8 +10,8 @@ export const dashboardRoutes: Routes = [
     data: { allowedRoles: ['Client-Admin', 'Admin', 'Manager', 'Client-Staff'] },
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'home' },
-      { path: 'home', loadComponent: () => import('../client/clients/dashboard/dashboard').then(m => m.Dashboard) },
-      { path: 'clients', loadComponent: () => import('../client/clients/clients.component').then(m => m.ClientsComponent) },
+      { path: 'home', loadComponent: () => import('./dashboard/dashboard').then(m => m.Dashboard) },
+      { path: 'clients', loadComponent: () => import('./clients/clients.component').then(m => m.ClientsComponent) },
     //   { path: 'employees', loadComponent: () => import('../client/employees/employees.component').then(m => m.EmployeesComponent) },
     //   { path: 'appointments', loadComponent: () => import('./appointments/appointments.component').then(m => m.AppointmentsComponent) },
     //   { path: 'pos', loadComponent: () => import('./pos/pos.component').then(m => m.PosComponent) },

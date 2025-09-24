@@ -11,7 +11,6 @@ export class JwtInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<any> {
     const token = this.authService.getToken();
 
-    // Rutas públicas (no se debe enviar el token en estas)
     const isPublicEndpoint = [
       '/api/auth/login/',
       '/api/auth/register/',
@@ -31,7 +30,6 @@ export class JwtInterceptor implements HttpInterceptor {
     return next.handle(authRequest).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401 && !isPublicEndpoint) {
-          // Token expirado o inválido
           this.authService.logout();
         }
         return throwError(() => error);
