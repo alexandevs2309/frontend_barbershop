@@ -93,6 +93,24 @@ export class SettingsComponent implements OnInit {
     }
 
     ngOnInit() {
+        console.log('🔧 Settings component initialized');
+        
+        // Verificar autenticación antes de cargar datos
+        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+        console.log('Settings component - Auth check:', {
+            hasToken: !!token,
+            tokenPreview: token ? token.substring(0, 20) + '...' : 'none',
+            localStorage: !!localStorage.getItem('access_token'),
+            sessionStorage: !!sessionStorage.getItem('access_token')
+        });
+        
+        // Mostrar notificación de prueba
+        this.messageService.add({
+            severity: 'info',
+            summary: 'Componente cargado',
+            detail: 'El componente de configuración se ha inicializado correctamente'
+        });
+        
         this.loadBranches();
     }
 
@@ -142,22 +160,50 @@ applyGeneralHoursToAllDays() {
 
 
     loadBranches() {
+        console.log('🏢 Loading branches...');
         this.loading = true;
+        
+        this.messageService.add({
+            severity: 'info',
+            summary: 'Cargando',
+            detail: 'Cargando sucursales...'
+        });
+        
         this.settingsService.getBranches().subscribe({
-            next: (branches: Branch[]) => {
-                this.branches = branches;
-                if (branches.length > 0) {
-                    this.selectedBranch = branches[0];
-                    this.settingForm.patchValue({ branch: branches[0].id });
-                    this.loadSettings(branches[0].id);
+            next: (response: any) => {
+                console.log('✅ Branches loaded:', response);
+                const branches = response.results || response;
+                this.branches = Array.isArray(branches) ? branches : [branches];
+                
+                if (this.branches.length > 0) {
+                    this.selectedBranch = this.branches[0];
+                    // Asegurar que el campo branch esté correctamente establecido
+                    this.settingForm.get('branch')?.setValue(this.branches[0].id);
+                    this.settingForm.get('branch')?.markAsTouched();
+                    console.log('🏢 Branch set to:', this.branches[0].id);
+                    this.loadSettings(this.branches[0].id);
+                } else {
+                    console.log('⚠️ No branches found');
+                    this.messageService.add({
+                        severity: 'warn',
+                        summary: 'Sin sucursales',
+                        detail: 'No se encontraron sucursales para este tenant'
+                    });
                 }
                 this.loading = false;
+                
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Sucursales cargadas',
+                    detail: `Se cargaron ${this.branches.length} sucursales`
+                });
             },
             error: (error: any) => {
+                console.error('❌ Error loading branches:', error);
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'Error al cargar sucursales'
+                    detail: 'Error al cargar sucursales: ' + (error.message || 'Error desconocido')
                 });
                 this.loading = false;
             }
@@ -314,20 +360,31 @@ applyGeneralHoursToAllDays() {
     saveSetting() {
         if (this.settingForm.invalid) {
             this.markFormGroupTouched(this.settingForm);
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Formulario inválido',
+                detail: 'Por favor complete todos los campos requeridos'
+            });
             return;
         }
 
         this.saving = true;
         const formData = this.settingForm.value;
+        
+        // Convertir 'Cerrado' a formato válido para el backend
+        if (formData.business_hours && formData.business_hours.sunday === 'Cerrado') {
+            formData.business_hours.sunday = '0:00-0:00';
+        }
 
-        const request = this.currentSetting ? this.settingsService.updateSettings(formData.branch, formData) : this.settingsService.createSettings(formData);
+        // Siempre usar updateSettings (PUT) ya que el backend maneja crear/actualizar automáticamente
+        const request = this.settingsService.updateSettings(formData.branch, formData);
 
         request.subscribe({
             next: (setting: Setting) => {
                 this.currentSetting = setting;
                 this.messageService.add({
                     severity: 'success',
-                    summary: 'Éxito',
+                    summary: '¡Éxito!',
                     detail: 'Configuración guardada correctamente'
                 });
                 this.saving = false;

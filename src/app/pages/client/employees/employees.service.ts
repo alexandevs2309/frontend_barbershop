@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, switchMap } from 'rxjs';
 import { environment } from '../../../../environment';
 
 @Injectable({
@@ -92,5 +92,33 @@ export class EmployeesService {
         }
       })
     );
+  }
+
+  createEmployeeWithUser(employeeData: any): Observable<any> {
+    // Crear usuario y empleado en una sola operación
+    const userData = {
+      full_name: employeeData.full_name,
+      email: employeeData.email,
+      password: employeeData.password,
+      role_ids: [employeeData.role_id]
+    };
+
+    // Primero crear usuario
+    return this.http.post<any>(`${environment.apiUrl}/auth/users/`, userData).pipe(
+      switchMap((userResponse: any) => {
+        // Luego crear empleado con el user_id
+        const empData = {
+          user_id: userResponse.id,
+          specialty: employeeData.specialty,
+          phone: employeeData.phone,
+          hire_date: employeeData.hire_date
+        };
+        return this.createEmployee(empData);
+      })
+    );
+  }
+
+  getRoles(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/roles/roles/`);
   }
 }

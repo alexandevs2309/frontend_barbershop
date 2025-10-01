@@ -91,13 +91,13 @@ export class PosService {
   }
 
   openCashRegister(initialCash: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/sales/open_register/`, { 
-      initial_cash: initialCash 
+    return this.http.post<any>(`${this.apiUrl}/cashregisters/`, { 
+      opening_amount: initialCash 
     });
   }
 
   getCurrentCashRegister(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/sales/current_register/`);
+    return this.http.get<any>(`${this.apiUrl}/cashregisters/current`);
   }
 
   closeCashRegister(registerId: number, finalCash: number): Observable<any> {

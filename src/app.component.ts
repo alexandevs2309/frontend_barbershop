@@ -12,6 +12,6 @@ export class AppComponent implements OnInit {
     constructor(private ent: EntitlementsService) {}
     
     ngOnInit() { 
-        this.ent.load().subscribe();
+        // this.ent.load().subscribe(); // Comentado temporalmente - endpoint no existe
     }
 }

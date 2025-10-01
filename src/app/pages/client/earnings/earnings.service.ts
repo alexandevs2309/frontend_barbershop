@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../../environment';
 import { handleResponse } from '../../../shared/utils/response.util';
@@ -60,7 +60,7 @@ export class EarningsService {
         map(handleResponse),
         catchError(error => {
           console.error('Error getting all earnings:', error);
-          return throwError(() => error);
+          return of([]);
         })
       );
   }

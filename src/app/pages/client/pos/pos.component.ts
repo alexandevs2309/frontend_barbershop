@@ -939,11 +939,8 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   get canProcessSalesCache(): boolean {
-    if (this.isTemplateCacheValid()) {
-      return this._cachedCanProcessSales;
-    }
+    // Siempre recalcular para evitar problemas de cache
     this._cachedCanProcessSales = this.canProcessSales();
-    this.updateTemplateCache();
     return this._cachedCanProcessSales;
   }
 
@@ -1174,6 +1171,9 @@ export class PosComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Forzar actualización del cache de permisos
+    this.clearTemplateCache();
+    
     if (!this.canAccessPOS()) {
       this.messageService.add({
         severity: 'error',
@@ -1724,7 +1724,9 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   canProcessSales(): boolean {
-    return this.authService.canProcessSales();
+    const result = this.authService.canProcessSales();
+    console.log('DEBUG - canProcessSales:', result, 'roles:', this.authService.getUserRoles());
+    return result;
   }
 
   isEmployeeRole(): boolean {
@@ -1764,7 +1766,11 @@ export class PosComponent implements OnInit, OnDestroy {
     });
   }
 
-  private calculateMonthlyEarnings(earnings: any[]): number {
+  private calculateMonthlyEarnings(earnings: any): number {
+    if (!Array.isArray(earnings)) {
+      return 0;
+    }
+    
     const currentYearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
     let total = 0;
 

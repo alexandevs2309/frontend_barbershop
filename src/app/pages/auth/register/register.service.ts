@@ -6,6 +6,7 @@ import { environment } from '../../../../environment';
 export interface RegisterData {
   fullName: string;
   email: string;
+  password: string;
   businessName: string;
   phone?: string;
   planType: string;
@@ -15,46 +16,10 @@ export interface RegisterData {
 }
 
 export interface RegisterResponse {
-  success: boolean;
-  message: string;
-  account: {
-    tenant_id: number;
-    user_id: number;
-    business_name: string;
-    plan: string;
-    plan_price: number;
-    trial_days: number;
-  };
-  payment: {
-    success: boolean;
-    transaction_id: string;
-    amount: number;
-    currency: string;
-    payment_method: {
-      type: string;
-      last4: string;
-      brand: string;
-      exp_month: number;
-      exp_year: number;
-    };
-    receipt_url: string;
-    status: string;
-    created: number;
-  };
-  login_url: string;
-  credentials: {
-    email: string;
-    password: string;
-    note: string;
-  };
-  next_steps: string[];
-  email_status: {
-    email_sent: boolean;
-    message_id: string;
-    recipient: string;
-    template: string;
-    status: string;
-  };
+  email: string;
+  full_name: string;
+  phone: string;
+  detail?: string;
 }
 
 @Injectable({
@@ -66,7 +31,17 @@ export class RegisterService {
   constructor(private http: HttpClient) {}
 
   registerWithPlan(data: RegisterData): Observable<RegisterResponse> {
-    return this.http.post<RegisterResponse>(`${this.apiUrl}/register/`, data);
+    // Mapear datos al formato esperado por el backend SaaS
+    const registerData = {
+      fullName: data.fullName,
+      email: data.email,
+      phone: data.phone || '',
+      businessName: data.businessName,
+      planType: data.planType,
+      address: 'Dirección por defecto'
+    };
+    
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/register/`, registerData);
   }
 
   validateCardNumber(cardNumber: string): boolean {

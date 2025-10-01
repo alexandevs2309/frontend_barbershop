@@ -184,7 +184,7 @@ isUtility(): boolean {
 // Permisos específicos para POS
 canAccessPOS(): boolean {
   // Solo roles de tenant pueden acceder al POS
-  return !this.isGlobalRole() && (this.isClientAdmin() || this.isCashier());
+  return !this.isGlobalRole() && (this.isClientAdmin() || this.isCashier() || this.isStylist());
 }
 
 canManageCashRegister(): boolean {
@@ -204,14 +204,24 @@ canViewSalesHistory(): boolean {
 }
 
 canProcessSales(): boolean {
-  return this.isClientAdmin() || this.isCashier();
+  const isAdmin = this.isClientAdmin();
+  const isCashier = this.isCashier();
+  const result = isAdmin || isCashier;
+  console.log('AuthService canProcessSales - isAdmin:', isAdmin, 'isCashier:', isCashier, 'result:', result);
+  return result;
 }
 
   /**
    * Obtener el token actual (prioridad a localStorage)
    */
  getToken(): string | null {
-  return localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+  const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+  console.log('AuthService.getToken():', {
+    hasLocalToken: !!localStorage.getItem('access_token'),
+    hasSessionToken: !!sessionStorage.getItem('access_token'),
+    finalToken: !!token
+  });
+  return token;
 }
 
 getCurrentUser(): any {

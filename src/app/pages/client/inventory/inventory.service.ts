@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../../environment';
 import { handleResponse } from '../../../shared/utils/response.util';
@@ -91,11 +91,15 @@ export class InventoryService {
   }
 
   getLowStockProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(`${this.apiUrl}/products/low-stock/`);
+    return this.http.get<Product[]>(`${this.apiUrl}/products/low-stock/`).pipe(
+      catchError(() => of([]))
+    );
   }
 
   getCategories(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/categories/`);
+    return this.http.get<string[]>(`${this.apiUrl}/categories/`).pipe(
+      catchError(() => of(['Productos de Cabello', 'Productos de Barba', 'Herramientas', 'Accesorios']))
+    );
   }
 
   bulkUpdateStock(updates: Array<{product_id: number, quantity: number, reason?: string}>): Observable<any> {

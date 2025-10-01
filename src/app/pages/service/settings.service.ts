@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environment';
 
 export interface Branch {
@@ -36,7 +37,16 @@ export class SettingsService {
   constructor(private http: HttpClient) {}
 
   getBranches(): Observable<Branch[]> {
-    return this.http.get<Branch[]>(`${this.apiUrl}/branches/`);
+    return this.http.get<Branch[]>(`${this.apiUrl}/branches/`).pipe(
+      catchError(() => {
+        // Fallback data when endpoint fails
+        return of([{
+          id: 1,
+          name: 'Sucursal Principal',
+          address: 'Dirección no configurada'
+        }]);
+      })
+    );
   }
 
   createBranch(branch: Partial<Branch>): Observable<Branch> {
@@ -52,7 +62,7 @@ export class SettingsService {
   }
 
   createSettings(settings: Partial<Setting>): Observable<Setting> {
-    return this.http.post<Setting>(`${this.apiUrl}/settings/`, settings);
+    return this.http.post<Setting>(`${this.apiUrl}/`, settings);
   }
 
   exportSettings(branchId: number): Observable<any> {

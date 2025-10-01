@@ -91,11 +91,13 @@ export class NotificationsWidget implements OnInit {
         
         this.appointmentsService.getAppointments({ date: today, status: 'scheduled' }).subscribe({
             next: (data) => {
-                const appointments = data.results || data;
-                this.upcomingAppointments = appointments.filter((apt: any) => {
-                    const aptTime = new Date(apt.date_time);
-                    return aptTime >= now && aptTime <= twoHoursLater;
-                }).slice(0, 3);
+                const appointments = data.results || data || [];
+                if (Array.isArray(appointments)) {
+                    this.upcomingAppointments = appointments.filter((apt: any) => {
+                        const aptTime = new Date(apt.date_time);
+                        return aptTime >= now && aptTime <= twoHoursLater;
+                    }).slice(0, 3);
+                }
             },
             error: () => this.upcomingAppointments = []
         });
@@ -105,11 +107,13 @@ export class NotificationsWidget implements OnInit {
         this.clientsService.getBirthdaysThisMonth().subscribe({
             next: (clients) => {
                 const today = new Date();
-                this.birthdayClients = clients.filter(client => {
-                    if (!client.birthday) return false;
-                    const birthday = new Date(client.birthday);
-                    return birthday.getDate() === today.getDate() && birthday.getMonth() === today.getMonth();
-                }).slice(0, 2);
+                if (Array.isArray(clients)) {
+                    this.birthdayClients = clients.filter(client => {
+                        if (!client.birthday) return false;
+                        const birthday = new Date(client.birthday);
+                        return birthday.getDate() === today.getDate() && birthday.getMonth() === today.getMonth();
+                    }).slice(0, 2);
+                }
             },
             error: () => this.birthdayClients = []
         });
@@ -118,7 +122,10 @@ export class NotificationsWidget implements OnInit {
     loadLowStockProducts() {
         this.http.get(`${environment.apiUrl}/inventory/products/?low_stock=true`).subscribe({
             next: (data: any) => {
-                this.lowStockProducts = (data.results || data).slice(0, 3);
+                const products = data.results || data || [];
+                if (Array.isArray(products)) {
+                    this.lowStockProducts = products.slice(0, 3);
+                }
             },
             error: () => this.lowStockProducts = []
         });

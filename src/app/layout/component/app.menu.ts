@@ -134,6 +134,7 @@ export class AppMenu implements OnInit, OnDestroy {
             baseMenu.push({
                 label: 'Gestión',
                 items: [
+                    { label: 'Usuarios', icon: 'pi pi-fw pi-user', routerLink: ['/client/users'] },
                     { label: 'Servicios', icon: 'pi pi-fw pi-list', routerLink: ['/client/services'] },
                     { label: 'Empleados', icon: 'pi pi-fw pi-user-plus', routerLink: ['/client/employees'] },
                     { label: 'Ganancias', icon: 'pi pi-fw pi-money-bill', routerLink: ['/client/earnings'] },

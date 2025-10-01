@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { tap, map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environment';
+import { AuthService } from '../../pages/auth/service/auth.service';
 
 export interface Entitlements {
   plan: string;
@@ -27,10 +28,14 @@ export class EntitlementsService {
   // 👇 Observable PÚBLICO (solo lectura para componentes)
   readonly entitlements$: Observable<Entitlements | null> = this._entitlements$.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
-  /** Carga y emite (si tuvieras un “load” explícito). */
+  /** Carga y emite (si tuvieras un "load" explícito). */
   load(): Observable<Entitlements | null> {
+    if (!this.authService.isAuthenticated()) {
+      this._entitlements$.next(null);
+      return of(null);
+    }
     return this.http.get<Entitlements>(this.url).pipe(
       map((e) => e ?? null),
       catchError((err: HttpErrorResponse) => {
@@ -48,6 +53,10 @@ export class EntitlementsService {
 
   /** Pide al backend y actualiza el stream. 404/401/403 => null (no error). */
   refresh(): Observable<Entitlements | null> {
+    if (!this.authService.isAuthenticated()) {
+      this._entitlements$.next(null);
+      return of(null);
+    }
     return this.http.get<Entitlements>(this.url).pipe(
       map((e) => e ?? null),
       catchError((err: HttpErrorResponse) => {

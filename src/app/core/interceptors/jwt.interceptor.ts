@@ -18,6 +18,13 @@ export class JwtInterceptor implements HttpInterceptor {
       '/api/auth/reset-password/'
     ].some(url => request.url.includes(url));
 
+    console.log('JWT Interceptor:', {
+      url: request.url,
+      hasToken: !!token,
+      isPublic: isPublicEndpoint,
+      tokenPreview: token ? token.substring(0, 20) + '...' : 'none'
+    });
+
     let authRequest = request;
     if (token && !isPublicEndpoint) {
       authRequest = request.clone({
@@ -29,6 +36,11 @@ export class JwtInterceptor implements HttpInterceptor {
 
     return next.handle(authRequest).pipe(
       catchError((error: HttpErrorResponse) => {
+        console.log('HTTP Error:', {
+          url: request.url,
+          status: error.status,
+          message: error.message
+        });
         if (error.status === 401 && !isPublicEndpoint) {
           this.authService.logout();
         }

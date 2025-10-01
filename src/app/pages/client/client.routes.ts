@@ -20,6 +20,10 @@ export const clientRoutes: Routes = [
       { path: 'agenda', loadComponent: () => import('./appointments/appointments.component').then(m => m.AppointmentsComponent) },
       { path: 'pos', loadComponent: () => import('./pos/pos.component').then(m => m.PosComponent) },
       { path: 'reports', loadComponent: () => import('./reports/reports.component').then(m => m.ReportsComponent) },
+      { 
+        path: 'users', 
+        loadComponent: () => import('./users/users.component').then(m => m.ClientUsersComponent)
+      },
       { path: 'settings', loadComponent: () => import('./settings/settings.component').then(m => m.SettingsComponent) },
 
     

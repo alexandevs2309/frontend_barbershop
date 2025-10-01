@@ -69,6 +69,32 @@ import { RegisterService, RegisterData } from './register.service';
               placeholder="tu@email.com">
           </div>
 
+          <div class="field mb-4">
+            <label for="password" class="block text-900 font-medium mb-2">Contraseña *</label>
+            <input 
+              pInputText 
+              id="password" 
+              type="password"
+              [(ngModel)]="formData.password"
+              name="password"
+              required
+              class="w-full"
+              placeholder="Mínimo 8 caracteres">
+          </div>
+
+          <div class="field mb-4">
+            <label for="passwordConfirm" class="block text-900 font-medium mb-2">Confirmar Contraseña *</label>
+            <input 
+              pInputText 
+              id="passwordConfirm" 
+              type="password"
+              [(ngModel)]="formData.passwordConfirm"
+              name="passwordConfirm"
+              required
+              class="w-full"
+              placeholder="Repite tu contraseña">
+          </div>
+
           <!-- Información del Negocio -->
           <div class="field mb-4">
             <label for="businessName" class="block text-900 font-medium mb-2">Nombre de la Barbería *</label>
@@ -231,6 +257,8 @@ export class RegisterComponent implements OnInit {
   formData = {
     fullName: '',
     email: '',
+    password: '',
+    passwordConfirm: '',
     businessName: '',
     phone: '',
     planType: '',
@@ -242,8 +270,9 @@ export class RegisterComponent implements OnInit {
 
   planOptions = [
     { label: 'Básico - $29/mes', value: 'basic' },
-    { label: 'Pro - $59/mes', value: 'pro' },
-    { label: 'Premium - $99/mes', value: 'premium' }
+    { label: 'Estándar - $49/mes', value: 'standard' },
+    { label: 'Premium - $79/mes', value: 'premium' },
+    { label: 'Enterprise - $129/mes', value: 'enterprise' }
   ];
 
   constructor(
@@ -265,8 +294,9 @@ export class RegisterComponent implements OnInit {
   getPlanName(plan: string): string {
     const names: any = {
       'basic': 'Básico',
-      'pro': 'Pro', 
-      'premium': 'Premium'
+      'standard': 'Estándar',
+      'premium': 'Premium',
+      'enterprise': 'Enterprise'
     };
     return names[plan] || plan;
   }
@@ -274,8 +304,9 @@ export class RegisterComponent implements OnInit {
   getPlanPrice(plan: string): string {
     const prices: any = {
       'basic': '$29',
-      'pro': '$59',
-      'premium': '$99'
+      'standard': '$49',
+      'premium': '$79',
+      'enterprise': '$129'
     };
     return prices[plan] || '$0';
   }
@@ -328,9 +359,21 @@ export class RegisterComponent implements OnInit {
   }
 
   private processRegistration() {
+    // Validar contraseñas
+    if (this.formData.password !== this.formData.passwordConfirm) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Error',
+        detail: 'Las contraseñas no coinciden'
+      });
+      this.loading = false;
+      return;
+    }
+
     const registerData: RegisterData = {
       fullName: this.formData.fullName,
       email: this.formData.email,
+      password: this.formData.password,
       businessName: this.formData.businessName,
       phone: this.formData.phone,
       planType: this.formData.planType,
@@ -345,7 +388,7 @@ export class RegisterComponent implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: '🎉 ¡Registro Exitoso!',
-          detail: `Tu barbería "${response.account?.business_name || 'cuenta'}" ha sido creada`,
+          detail: `Tu cuenta ha sido creada exitosamente para ${response.full_name}`,
           life: 5000
         });
 
@@ -354,7 +397,7 @@ export class RegisterComponent implements OnInit {
           this.messageService.add({
             severity: 'info',
             summary: '📧 Revisa tu Email',
-            detail: `Hemos enviado tus credenciales de acceso a:\n${response.credentials.email}\n\nRevisa tu bandeja de entrada (y spam) para acceder a tu cuenta.`,
+            detail: `Hemos enviado tus credenciales de acceso a:\n${this.formData.email}\n\nRevisa tu bandeja de entrada (y spam) para acceder a tu cuenta.`,
             life: 8000
           });
         }, 1000);
@@ -376,14 +419,35 @@ export class RegisterComponent implements OnInit {
       error: (error) => {
         console.error('Error en registro:', error);
         
-        // Mostrar error específico
-        const errorMessage = error.error?.error || 'Error al procesar el registro';
+        // Mostrar errores específicos del backend
+        let errorMessage = 'Error al procesar el registro';
+        
+        if (error.error) {
+          if (typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.error.detail) {
+            errorMessage = error.error.detail;
+          } else if (error.error.non_field_errors) {
+            errorMessage = error.error.non_field_errors.join(', ');
+          } else {
+            // Mostrar errores de campos específicos
+            const fieldErrors = [];
+            for (const [field, errors] of Object.entries(error.error)) {
+              if (Array.isArray(errors)) {
+                fieldErrors.push(`${field}: ${errors.join(', ')}`);
+              }
+            }
+            if (fieldErrors.length > 0) {
+              errorMessage = fieldErrors.join('\n');
+            }
+          }
+        }
         
         this.messageService.add({
           severity: 'error',
           summary: '❌ Error de Registro',
           detail: errorMessage,
-          life: 0  // No se cierra automáticamente
+          life: 0
         });
         
         this.loading = false;

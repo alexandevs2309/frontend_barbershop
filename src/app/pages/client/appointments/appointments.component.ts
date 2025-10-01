@@ -179,7 +179,9 @@ export class AppointmentsComponent implements OnInit {
 
         this.appointmentsService.getAppointments(params).subscribe({
             next: (response) => {
-                this.appointments = response.results || response;
+                // Asegurar que siempre sea un array
+                const appointments = response.results || response;
+                this.appointments = Array.isArray(appointments) ? appointments : [];
                 this.loading = false;
             },
             error: () => {
@@ -188,6 +190,7 @@ export class AppointmentsComponent implements OnInit {
                     summary: 'Error',
                     detail: 'Error al cargar citas'
                 });
+                this.appointments = []; // Asegurar que sea un array vacío en caso de error
                 this.loading = false;
             }
         });

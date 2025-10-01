@@ -31,8 +31,8 @@ import { sanitizeForLog } from '../../../shared/utils/error.util';
   <div class="flex justify-content-between align-items-center mb-4">
     <h2 class="m-0">Gestión de Empleados</h2>
     <div class="flex gap-2">
-      <p-button label="Gestionar Usuarios" icon="pi pi-users" 
-                (click)="showUserManagement()" 
+      <p-button label="Gestionar Usuarios" icon="pi pi-users"
+                (click)="showUserManagement()"
                 styleClass="p-button-outlined"
                 pTooltip="Asignar tenant a usuarios"></p-button>
       <p-button label="Nuevo Empleado" icon="pi pi-plus" (click)="showDialog()"
@@ -89,21 +89,55 @@ import { sanitizeForLog } from '../../../shared/utils/error.util';
           [closable]="true" [draggable]="false" [resizable]="false"
           styleClass="p-fluid">
 
-  <div class="formgrid grid">
+  <div class="formgrid grid" *ngIf="!isEdit">
+    <!-- Crear nuevo empleado con usuario -->
     <div class="field col-12">
-      <label for="user">Usuario *</label>
-      <p-select [options]="availableUsers" [(ngModel)]="employee.user_id"
-                 optionLabel="full_name" optionValue="id" placeholder="Seleccionar usuario"
-                 [disabled]="isEdit" class="w-full">
-        <ng-template let-user pTemplate="item">
-          <div class="flex justify-content-between align-items-center">
-            <span>{{ user.full_name }} ({{ user.email }})</span>
-            <p-tag *ngIf="!user.tenant_id" value="Sin Tenant" severity="warning" class="ml-2"></p-tag>
-          </div>
-        </ng-template>
+      <label for="full_name">Nombre Completo *</label>
+      <input type="text" pInputText [(ngModel)]="employee.full_name"
+             placeholder="Nombre del empleado" class="w-full" />
+    </div>
+
+    <div class="field col-12">
+      <label for="email">Email *</label>
+      <input type="email" pInputText [(ngModel)]="employee.email"
+             placeholder="email@barberia.com" class="w-full" />
+    </div>
+
+    <div class="field col-12">
+      <label for="password">Contraseña Temporal *</label>
+      <input type="password" pInputText [(ngModel)]="employee.password"
+             placeholder="Contraseña temporal" class="w-full" />
+    </div>
+
+    <div class="field col-12">
+      <label for="role">Rol *</label>
+      <p-select [options]="availableRoles" [(ngModel)]="employee.role_id"
+                optionLabel="name" optionValue="id" placeholder="Seleccionar rol"
+                class="w-full">
       </p-select>
     </div>
 
+    <div class="field col-12 md:col-6">
+      <label for="specialty">Especialidad</label>
+      <input type="text" pInputText [(ngModel)]="employee.specialty"
+             placeholder="Ej: Corte, Barba" />
+    </div>
+
+    <div class="field col-12 md:col-6">
+      <label for="phone">Teléfono</label>
+      <input type="text" pInputText [(ngModel)]="employee.phone"
+             placeholder="Número de contacto" maxlength="15" />
+    </div>
+
+    <div class="field col-12">
+      <label for="hire_date">Fecha de Contratación</label>
+      <p-datepicker [(ngModel)]="employee.hire_date" dateFormat="yy-mm-dd"
+                    placeholder="Seleccionar fecha" class="w-full"></p-datepicker>
+    </div>
+  </div>
+
+  <div class="formgrid grid" *ngIf="isEdit">
+    <!-- Editar empleado existente -->
     <div class="field col-12 md:col-6">
       <label for="specialty">Especialidad</label>
       <input type="text" pInputText [(ngModel)]="employee.specialty"
@@ -139,13 +173,13 @@ import { sanitizeForLog } from '../../../shared/utils/error.util';
   <div class="mb-4">
     <p class="text-muted">Los siguientes usuarios no tienen tenant asignado y no pueden ser empleados:</p>
   </div>
-  
+
   <div *ngIf="usersWithoutTenant.length === 0" class="text-center p-4">
     <i class="pi pi-check-circle text-green-500 text-3xl mb-2"></i>
     <p class="text-lg font-semibold">¡Perfecto!</p>
     <p>Todos los usuarios tienen tenant asignado</p>
   </div>
-  
+
   <div *ngIf="usersWithoutTenant.length > 0">
     <p-table [value]="usersWithoutTenant">
       <ng-template pTemplate="header">
@@ -165,15 +199,15 @@ import { sanitizeForLog } from '../../../shared/utils/error.util';
         </tr>
       </ng-template>
     </p-table>
-    
+
     <div class="mt-4 p-3 bg-blue-50 border-l-4 border-blue-400">
       <p class="text-sm text-blue-700">
-        <strong>Nota:</strong> Para que estos usuarios puedan ser empleados, 
+        <strong>Nota:</strong> Para que estos usuarios puedan ser empleados,
         necesitan tener un tenant asignado. Contacte al administrador del sistema.
       </p>
     </div>
   </div>
-  
+
   <ng-template pTemplate="footer">
     <p-button label="Cerrar" (click)="showUserInfoDialog = false"></p-button>
   </ng-template>
@@ -263,6 +297,7 @@ import { sanitizeForLog } from '../../../shared/utils/error.util';
 export class EmployeesComponent implements OnInit {
   employees: any[] = [];
   availableUsers: any[] = [];
+  availableRoles: any[] = [];
   employee: any = {};
   displayDialog = false;
   isEdit = false;
@@ -270,20 +305,20 @@ export class EmployeesComponent implements OnInit {
   saving = false;
   showUserInfoDialog = false;
   usersWithoutTenant: any[] = [];
-  
+
   // Gestión de servicios
   servicesDialog = false;
   availableServices: any[] = [];
   employeeServices: any[] = [];
   selectedEmployeeForServices: any = null;
   savingServices = false;
-  
+
   // Gestión de horarios
   scheduleDialog = false;
   employeeSchedules: any[] = [];
   selectedEmployeeForSchedule: any = null;
   savingSchedule = false;
-  
+
   daysOfWeek = [
     { label: 'Lunes', value: 'monday' },
     { label: 'Martes', value: 'tuesday' },
@@ -304,6 +339,7 @@ export class EmployeesComponent implements OnInit {
     this.loadEmployees();
     this.loadAvailableUsers();
     this.loadAvailableServices();
+    this.loadRoles();
   }
 
   loadEmployees() {
@@ -336,7 +372,7 @@ export class EmployeesComponent implements OnInit {
           }
           return true;
         });
-        
+
         if (data.length > this.availableUsers.length) {
           this.messageService.add({
             severity: 'warn',
@@ -354,7 +390,7 @@ export class EmployeesComponent implements OnInit {
   }
 
   showDialog() {
-    this.employee = { is_active: true };
+    this.employee = { is_active: true, hire_date: new Date() };
     this.isEdit = false;
     this.displayDialog = true;
   }
@@ -374,14 +410,33 @@ export class EmployeesComponent implements OnInit {
     this.employee = {};
   }
 
+  loadRoles() {
+    this.employeesService.getRoles().subscribe({
+      next: (data: any) => {
+        this.availableRoles = (Array.isArray(data) ? data : (data?.results || []))
+          .filter((role: any) => role.scope === 'TENANT');
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al cargar roles'
+        });
+      }
+    });
+  }
+
   saveEmployee() {
-    if (!this.isEdit && !this.employee.user_id) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Advertencia',
-        detail: 'Debe seleccionar un usuario'
-      });
-      return;
+    // Validaciones para nuevo empleado
+    if (!this.isEdit) {
+      if (!this.employee.full_name || !this.employee.email || !this.employee.password || !this.employee.role_id) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Advertencia',
+          detail: 'Complete todos los campos requeridos'
+        });
+        return;
+      }
     }
 
     // Formatear fecha correctamente
@@ -393,7 +448,7 @@ export class EmployeesComponent implements OnInit {
     this.saving = true;
     const operation = this.isEdit
       ? this.employeesService.updateEmployee(this.employee.id, employeeData)
-      : this.employeesService.createEmployee(employeeData);
+      : this.employeesService.createEmployeeWithUser(employeeData);
 
     operation.subscribe({
       next: () => {
@@ -409,20 +464,45 @@ export class EmployeesComponent implements OnInit {
       error: (error) => {
         console.error('Error saving employee:', sanitizeForLog(error));
         let errorMsg = 'Error al guardar empleado';
+        
+        // Manejar errores de validación específicos
         if (error.error) {
-          if (typeof error.error === 'string') {
-            errorMsg = error.error;
+          if (error.error.email) {
+            if (Array.isArray(error.error.email)) {
+              errorMsg = error.error.email[0];
+            } else {
+              errorMsg = 'Este email ya está registrado';
+            }
+          } else if (error.error.password) {
+            if (Array.isArray(error.error.password)) {
+              errorMsg = `Contraseña: ${error.error.password[0]}`;
+            } else {
+              errorMsg = 'Error en la contraseña';
+            }
+          } else if (error.error.full_name) {
+            if (Array.isArray(error.error.full_name)) {
+              errorMsg = `Nombre: ${error.error.full_name[0]}`;
+            }
+          } else if (error.error.role_ids) {
+            if (Array.isArray(error.error.role_ids)) {
+              errorMsg = `Rol: ${error.error.role_ids[0]}`;
+            }
           } else if (error.error.detail) {
             errorMsg = error.error.detail;
-          } else if (Array.isArray(error.error)) {
-            errorMsg = error.error.join(', ');
-          } else {
-            errorMsg = JSON.stringify(error.error);
+          } else if (error.error.message) {
+            errorMsg = error.error.message;
+          } else if (typeof error.error === 'object') {
+            // Mostrar el primer error encontrado
+            const firstError = Object.keys(error.error)[0];
+            if (firstError && Array.isArray(error.error[firstError])) {
+              errorMsg = `${firstError}: ${error.error[firstError][0]}`;
+            }
           }
         }
+        
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
+          summary: 'Error de Validación',
           detail: errorMsg
         });
         this.saving = false;

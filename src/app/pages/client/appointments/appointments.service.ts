@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, catchError } from 'rxjs';
+import { Observable, of, map, catchError } from 'rxjs';
 import { environment } from '../../../../environment';
 
 export interface Appointment {
@@ -22,15 +22,13 @@ export interface Appointment {
   providedIn: 'root'
 })
 export class AppointmentsService {
-  private apiUrl = `${environment.apiUrl}/appointments`;
+  private apiUrl = `${environment.apiUrl}/appointments/appointments`;
 
   constructor(private http: HttpClient) {}
 
   getAppointments(params?: any): Observable<any> {
-    console.log('Appointments URL:', `${this.apiUrl}/`);
     return this.http.get<any>(`${this.apiUrl}/`, { params }).pipe(
       map(response => {
-        console.log('Appointments response:', response);
         if (Array.isArray(response)) {
           return { results: response, count: response.length };
         }
@@ -38,7 +36,7 @@ export class AppointmentsService {
       }),
       catchError(error => {
         console.error('Appointments error:', error);
-        throw error;
+        return of({ results: [], count: 0 });
       })
     );
   }

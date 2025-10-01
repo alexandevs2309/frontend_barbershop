@@ -49,9 +49,11 @@ export class Dashboard implements OnInit {
         
         this.appointmentsService.getAppointments({ date: today }).subscribe({
             next: (data) => {
-                const appointments = data.results || data;
-                this.statsData.todayAppointments = appointments.length;
-                this.statsData.pendingAppointments = appointments.filter((a: any) => a.status === 'scheduled').length;
+                const appointments = data.results || data || [];
+                if (Array.isArray(appointments)) {
+                    this.statsData.todayAppointments = appointments.length;
+                    this.statsData.pendingAppointments = appointments.filter((a: any) => a.status === 'scheduled').length;
+                }
             },
             error: () => console.error('Error loading appointments')
         });
@@ -63,8 +65,10 @@ export class Dashboard implements OnInit {
 
         this.http.get(`${environment.apiUrl}/pos/sales/?date=${today}`).subscribe({
             next: (data: any) => {
-                const sales = data.results || data;
-                this.statsData.todayRevenue = sales.reduce((sum: number, sale: any) => sum + (sale.total || 0), 0);
+                const sales = data.results || data || [];
+                if (Array.isArray(sales)) {
+                    this.statsData.todayRevenue = sales.reduce((sum: number, sale: any) => sum + (sale.total || 0), 0);
+                }
             },
             error: () => console.error('Error loading revenue')
         });

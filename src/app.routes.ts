@@ -49,6 +49,7 @@ export const appRoutes: Routes = [
           { path: 'appointments', loadComponent: () => import('./app/pages/client/appointments/appointments.component').then(m => m.AppointmentsComponent) },
           { path: 'pos', loadComponent: () => import('./app/pages/client/pos/pos.component').then(m => m.PosComponent) },
           { path: 'reports', loadComponent: () => import('./app/pages/client/reports/reports.component').then(m => m.ReportsComponent) },
+          { path: 'users', loadComponent: () => import('./app/pages/client/users/users.component').then(m => m.ClientUsersComponent) },
           {
             path: 'settings',
             loadComponent: () => import('./app/pages/client/settings/settings.component').then(m => m.SettingsComponent),

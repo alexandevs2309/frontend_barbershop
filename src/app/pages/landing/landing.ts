@@ -10,12 +10,13 @@ import { FeaturesWidget } from './components/featureswidget';
 import { HighlightsWidget } from './components/highlightswidget';
 import { PricingWidget } from './components/pricingwidget';
 import { FooterWidget } from './components/footerwidget';
+import { ScrollTopButtonComponent } from './components/ScrollTopButtonComponent';
 import { LayoutService } from '../../layout/service/layout.service';
 
 @Component({
     selector: 'app-landing',
     standalone: true,
-    imports: [RouterModule, TopbarWidget, HeroWidget, FeaturesWidget, HighlightsWidget, PricingWidget, FooterWidget, RippleModule, StyleClassModule, ButtonModule, DividerModule],
+    imports: [RouterModule, TopbarWidget, HeroWidget, FeaturesWidget, HighlightsWidget, PricingWidget, FooterWidget, RippleModule, StyleClassModule, ButtonModule, DividerModule, ScrollTopButtonComponent],
     template: `
         <div class="bg-surface-0 dark:bg-surface-900">
             <div id="home" class="landing-wrapper overflow-hidden">
@@ -27,6 +28,7 @@ import { LayoutService } from '../../layout/service/layout.service';
                 <footer-widget />
             </div>
         </div>
+        <app-scroll-top-button></app-scroll-top-button>
     `
 })
 export class Landing {

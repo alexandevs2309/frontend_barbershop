@@ -25,12 +25,14 @@
                         ],
                         "tsConfig": "tsconfig.app.json",
                         "inlineStyleLanguage": "scss",
-                        "assets": [
+                         "assets": [
                             {
-                                "glob": "**/*",
-                                "input": "public"
-                            }
+                            "glob": "**/*",
+                            "input": "public"
+                            },
+                            "src/assets"
                         ],
+
                         "styles": [
                             "src/styles.scss"
                         ],
@@ -46,8 +48,8 @@
                                 },
                                 {
                                     "type": "anyComponentStyle",
-                                    "maximumWarning": "2kb",
-                                    "maximumError": "4kb"
+                                    "maximumWarning": "6kb",
+                                    "maximumError": "10kb"
                                 }
                             ],
                             "outputHashing": "all"

@@ -153,12 +153,17 @@ export class PrintService {
   }
 
   private generateDenominationsHTML(denominations: any[]): string {
-    return denominations.map(d => `
-      <div class="denomination">
-        <span>$${d.value.toFixed(2)} x ${d.count}</span>
-        <span>$${d.total.toFixed(2)}</span>
-      </div>
-    `).join('');
+    return denominations.map(d => {
+      const value = Number(d?.value) || 0;
+      const count = Number(d?.count) || 0;
+      const total = Number(d?.total) || 0;
+      return `
+        <div class="denomination">
+          <span>$${value.toFixed(2)} x ${count}</span>
+          <span>$${total.toFixed(2)}</span>
+        </div>
+      `;
+    }).join('');
   }
 
   private getPaymentMethodLabel(method: string): string {
@@ -218,8 +223,10 @@ export class PrintService {
     const openDate = new Date(register.opened_at).toLocaleString();
     const closeDate = register.closed_at ? new Date(register.closed_at).toLocaleString() : 'En curso';
     
-    const totalCounted = denominations.reduce((sum, d) => sum + (d?.total || 0), 0);
-    const expectedTotal = register.opening_amount + register.total_sales;
+    const totalCounted = denominations.reduce((sum, d) => sum + (Number(d?.total) || 0), 0);
+    const openingAmount = Number(register.opening_amount) || 0;
+    const totalSales = Number(register.total_sales) || 0;
+    const expectedTotal = openingAmount + totalSales;
     const difference = totalCounted - expectedTotal;
     
     return `
@@ -249,8 +256,8 @@ export class PrintService {
         
         <div class="section">
           <h3>Resumen</h3>
-          <div>Fondo inicial: $${register.opening_amount.toFixed(2)}</div>
-          <div>Ventas del día: $${register.total_sales.toFixed(2)}</div>
+          <div>Fondo inicial: $${openingAmount.toFixed(2)}</div>
+          <div>Ventas del día: $${totalSales.toFixed(2)}</div>
           <div>Total esperado: $${expectedTotal.toFixed(2)}</div>
           <div>Total contado: $${totalCounted.toFixed(2)}</div>
         </div>
